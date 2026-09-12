@@ -1,0 +1,12 @@
+# Python 3.12; direct HTTPS is used for Kalshi (see README).
+# kalshi-exchanges-python does not exist on PyPI; an invalid pin would break installation.
+pandas==2.2.3
+numpy==2.2.6
+beautifulsoup4==4.13.4
+requests==2.32.5
+scikit-learn==1.6.1
+xgboost==3.0.2
+joblib==1.5.1
+streamlit==1.45.1
+cryptography==46.0.5
+python-dotenv==1.1.0
