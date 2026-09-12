@@ -65,14 +65,28 @@ def test_pre_fight_features_cannot_see_own_or_future_bouts(db, profiles):
     assert after.iloc[1].strike_diff != before.iloc[1].strike_diff
 
 
-def test_probabilities_are_complementary_despite_asymmetric_td_feature(profiles):
+def test_probabilities_are_complementary_despite_asymmetric_td_feature(profiles, db, monkeypatch):
+    monkeypatch.setattr(
+        "modeling.compute_pre_fight_metrics",
+        lambda *args, **kwargs: {
+            "stats_bouts": 3,
+            "slpm": 3,
+            "sapm": 2,
+            "td_acc": 0.4,
+            "td_def": 0.7,
+            "win_streak": 1,
+            "finish_rate": 0.5,
+            "sig_strike_differential_moving": 1,
+            "takedown_defense_moving": 0.7,
+        },
+    )
     model = SimpleNamespace(
         ufc_metadata_={"demographic_medians": {"reach": 72, "age": 30}},
         predict_proba=Mock(return_value=np.array([[0.3, 0.7]])),
     )
     a, b = profiles
-    assert predict_matchup(model, a, b, "2026-01-01") == 0.7
-    assert predict_matchup(model, b, a, "2026-01-01") == pytest.approx(0.3)
+    assert predict_matchup(model, a, b, "2026-01-01", db=db) == 0.7
+    assert predict_matchup(model, b, a, "2026-01-01", db=db) == pytest.approx(0.3)
     left, right = model.predict_proba.call_args_list
     pd.testing.assert_frame_equal(left.args[0], right.args[0])
 
@@ -87,7 +101,23 @@ def test_ev_and_fee_math():
 def test_small_dataset_does_not_replace_existing_model(db, profiles, tmp_path):
     for p in profiles:
         db.save_profile(p)
-    db.save_fights([historical_record(profiles, 1, "2025-01-01")])
+    fights = [historical_record(profiles, i, f"2025-01-0{i}") for i in range(1, 4)]
+    db.save_fights(fights)
+    db.save_statistics(
+        [
+            dict(
+                fight_id=fight["fight_id"],
+                fighter_id=p["fighter_id"],
+                sig_landed=20,
+                sig_attempted=50,
+                td_landed=1,
+                td_attempted=3,
+                duration_seconds=300,
+            )
+            for fight in fights
+            for p in profiles
+        ]
+    )
     destination = tmp_path / "ufc_brain.pkl"
     destination.write_bytes(b"previous-model")
     with pytest.raises(ValueError, match="50 usable"):

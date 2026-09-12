@@ -40,10 +40,11 @@ The bootstrap downloads **data only** from a pinned public UFCStats archive; it 
 | --- | --- |
 | `database.py` | SQLite initialization, profile/fight upserts, idempotent journal writes, atomic settlement, integer-cent accounting |
 | `ufc_scraper.py` | Requests + Beautiful Soup parsers, retry/backoff, incremental profile refresh, raw HTML caching, joined pandas export |
-| `features.py` | Shared four-feature definition, age-at-fight calculation, training-only demographic medians |
+| `features.py` | Shared eight-feature definition, age-at-fight calculation, sklearn transformer for fold-safe raw-metric medians |
 | `parsing.py` | Shared validated count and round-duration parsers |
-| `historical_features.py` | Pre-fight rate reconstruction from earlier recorded bouts |
-| `train_ufc_model.py` | Five-fold stratified validation, chronological holdout, full-data training, atomic artifact replacement |
+| `historical_features.py` | Strictly pre-fight career, streak, finish, and last-three-bout metrics for database queries and bulk exports |
+| `temporal_validation.py` | Expanding training windows grouped by whole event dates, reused for validation and calibration |
+| `train_ufc_model.py` | Nested temporal validation, sigmoid/isotonic calibration, reliability reports, calibrated artifact serialization |
 | `modeling.py` | Saved-model compatibility checks and complementary matchup probabilities |
 | `kalshi_mma_client.py` | Public or RSA-authenticated HTTPS reads, paginated catalog discovery, executable YES prices, local quote snapshots |
 | `analytics.py` | Matchup identity resolution, model coverage checks, probability/edge/EV calculations |
@@ -64,7 +65,7 @@ One supporting table, **fight_statistics**, retains each fighter’s per-bout st
 
 SQLite uses WAL, transactions, parameterized queries, a 30-second busy timeout, and constraints. Each operation owns and closes its connection. Reimporting a fight or fighter updates the existing record. Settlement is atomic: repeated settlement to the same outcome is harmless; changing an already-settled outcome is rejected.
 
-Logs rotate in `logs/ufc.log` (2 MB × 5 files). `.env`, private keys, database files, caches, logs, and model artifacts are excluded from Git. For a consistent backup while the app is running, use SQLite’s backup API rather than copying only the `.db` file:
+Logs rotate in `logs/ufc.log` (2 MB × 5 files). `.env`, private keys, database files, caches, logs, and model pickle files are excluded from Git. The nonpersonal `ufc_brain.metrics.json` report is versioned with the code. For a consistent backup while the app is running, use SQLite’s backup API rather than copying only the `.db` file:
 
 ```sh
 python - <<'PY'
@@ -115,39 +116,62 @@ python ufc_scraper.py --events 3 --export artifacts/training.csv
 # Train the default Random Forest or the optional XGBoost classifier.
 python train_ufc_model.py
 python train_ufc_model.py --algorithm xgboost
+
+# Optional isotonic calibration; sigmoid is preferred for smaller calibration sets.
+python train_ufc_model.py --calibration isotonic
 ```
 
 Profiles younger than 30 days produce no network request. The default scraper delay is 1.5 seconds per request, with bounded timeouts, retries, and backoff. Raw event pages refresh after 30 days; the event catalog after six hours; fighter-directory pages after seven days. Same-day event cards are excluded until they are historical. A partial statistics import is reported and can be resumed. Exact normalized fighter-name matching tolerates accents and punctuation but rejects ambiguity; it never silently substitutes a similarly named fighter.
 
 The archive import retains real fight results, excludes ambiguous identity joins, and reconstructs career rates from available bout totals. Those profiles are labeled `archive_aggregate`, distinct from directly scraped career snapshots. The prepared import retained 8,790 fights, 17,476 fighter-bout statistic rows, and 2,693 profiles; 84 ambiguous/unusable fights and 52 bouts without complete statistics were reported rather than invented. Missing or ambiguous historical records can make reconstructed careers incomplete.
 
-The four features are always computed by the same functions:
+The classifier receives exactly these eight features, computed by shared functions:
 
 ```text
 reach_diff  = A.reach − B.reach
 strike_diff = (A.SLpM − A.SApM) − (B.SLpM − B.SApM)
 td_diff     = A.TD_Def − B.TD_Acc
 age_diff    = A.age − B.age
+win_streak_diff   = A.win_streak − B.win_streak
+finish_rate_diff  = A.finish_rate − B.finish_rate
+strike_diff_moving = A.sig_strike_differential_moving − B.sig_strike_differential_moving
+td_def_diff_moving = A.takedown_defense_moving − B.takedown_defense_moving
 ```
 
 The target is `1` when canonical Fighter A won, `0` when Fighter B won. UFCStats often lists the winner first, so fighters are ordered by their stable IDs before training. Live prediction uses the same ordering; the opposing contract receives the complementary probability. This matters because the requested `td_diff` is asymmetric and cannot simply be negated.
 
-When bout statistics are available, training uses only each fighter’s previous recorded bouts, with at least two prior bouts on both sides. Updates are applied after each entire event date, preventing same-card information leakage. Age is calculated at the fight date from DOB. Reach and DOB remain static attributes, and incomplete older records remain a coverage limitation. There is no use of post-fight current career rates in this mode.
+`compute_pre_fight_metrics(fighter_id, fight_date, db=...)` queries all recorded bouts with `date < fight_date`; the target date and all future results are excluded. Both training exports and live predictions use the same metric implementation. Training requires at least two earlier bouts with complete statistics on both sides. Bulk updates are applied after each entire event date, preventing same-card leakage. Live inference uses the event ticker’s nominal calendar date, which can differ from its UTC start date. Age comes from DOB at the fight date. Reach and DOB remain static attributes, and incomplete older records remain a coverage limitation.
 
-When only career profiles and results are available, the exporter supports the requested retrospective join. The trainer and UI explicitly label that mode as containing future-information risk; its metrics cannot establish out-of-sample trading value.
+Historical metrics are defined as follows:
 
-The default DataFrame export imputes missing **raw** reach and age using dataset medians before computing differences. Training instead requests unfilled inputs, learns medians inside each training fold, then transforms its held-out rows. Full-data medians are saved with the model and reused for inference. A completely missing demographic column stops training instead of inventing a constant.
+- **Win streak:** consecutive wins immediately preceding the target fight. Losses, draws, and no contests reset it. Old tournaments with mixed outcomes on the same date and unknown bout order produce a missing value rather than an invented sequence.
+- **Finish rate:** KO/TKO or submission wins divided by all prior wins, expressed on `[0, 1]`; zero when there are no previous wins.
+- **Moving striking differential:** arithmetic mean of `(significant strikes landed − absorbed) / bout minutes` across the last three consecutive bouts, or the available earlier bouts when fewer than three exist. This is a mean of per-bout rates, not a duration-weighted aggregate.
+- **Moving takedown defense:** pooled defended takedowns divided by pooled opposing attempts over that same window. With zero attempts, use the empirical career defense from strictly earlier bouts. If the career also has no attempts, leave it missing until the estimator applies its training-fold median.
 
-Training requires at least 50 valid fights and five examples of each target class. It reports mean Accuracy, Precision, and Brier Score across five shuffled stratified folds, plus an event-date chronological holdout and constant-probability baseline. A reproducible Random Forest is the default. XGBoost is optional; macOS may require `libomp` to load it. Model artifacts include feature/version checks, training dates, provenance, medians, data hash, metrics, and class counts; a serialization round-trip is verified before replacement. Load only locally trusted `.pkl` files: joblib deserialization can execute code.
+Results with missing statistics still count toward streaks, finish rates, and the last-three window. An incomplete window stays missing; older bouts are never substituted. Uncertain ordering at a same-day window boundary also stays missing. Current profile career rates never enter historical or live model inputs. Without per-bout history, training stops instead of falling back to a retrospective join.
 
-Prepared model results (4,911 usable pre-fight rows):
+The readable DataFrame export defaults to dataset-median filling of raw inputs, including reach and age, before constructing differences. **Do not use that filled export for validation.** The trainer explicitly requests `impute=False` and supplies 20 named raw A/B metrics to a pipeline. Its `PreFightFeatureTransformer` learns pooled A/B medians separately inside each estimator’s training split and then creates the eight-column `X`. Calibration rows and outer test rows never influence these medians. An entirely missing raw metric stops training instead of inventing a constant.
 
-| Validation | Accuracy | Precision | Brier score | Baseline Brier |
-| --- | ---: | ---: | ---: | ---: |
-| Five-fold mean | 60.21% | 60.22% | 0.2371 | 0.2500 |
-| Chronological holdout, from 2023-02-11 | 61.09% | 59.46% | 0.2315 | 0.2501 |
+Training uses **five outer expanding windows**, each testing strictly later event dates. These replace shuffled stratified folds because a shuffled split can train on future outcomes. Every outer training window contains **three inner expanding windows** for calibration. Base-estimator training and calibration sets must contain both classes; insufficient chronological coverage stops training. At least 50 usable fights and five outcomes per class are required, but those totals alone cannot guarantee valid temporal splits.
 
-These evaluate fight predictions, **not betting returns against historical executable Kalshi quotes**. The four-feature model omits opponent strength, weight class, injuries, and fight-week information. Probability calibration and historical quote/fee backtesting are still needed to establish a reliable monetary edge. Fighters with insufficient local history or missing rate statistics are shown under unavailable predictions.
+The primary pipeline is wrapped in `CalibratedClassifierCV(method="sigmoid", ensemble=True)`. Each of its three base estimators fits on an earlier prefix and its Platt calibrator fits on the following held-out date block. Predictions average the calibrated pairs. The final artifact uses the entire eligible dataset across these chronological training/calibration roles; the latest calibration block is deliberately not refitted into a base classifier. `ensemble=False` would require a complete cross-validation partition and is incompatible with the untested warm-up prefix used here.
+
+The object saved directly to `ufc_brain.pkl` is the fitted **CalibratedClassifierCV**, including each pipeline and its own medians. `model.predict_proba(raw_inputs)` performs filling, eight-feature construction, and calibration automatically. Complete, finite eight-column feature DataFrames are also accepted for inference. When either fighter has missing raw metrics, pass the named raw inputs so each estimator can impute before differencing. The dashboard follows this path and makes the opposing fighter’s probability complementary.
+
+`ufc_brain.metrics.json` includes mean and pooled out-of-sample accuracy, precision, Brier score, log-loss, fold-specific prevalence baselines, raw-model comparisons, all training/calibration/test date bounds, a recent-20%-of-event-dates holdout, reliability bins, expected calibration error, data hash, provenance, versions, and imputation medians. The initial warm-up is excluded from out-of-sample totals. The additional holdout overlaps the later outer test periods and is a diagnostic, not an independent second experiment. Serialization and finite probabilities are checked before saving. Load only locally trusted `.pkl` files: joblib deserialization can execute code.
+
+A reproducible Random Forest is the default. XGBoost is optional; macOS may require `libomp`. Sigmoid calibration is the default because isotonic can overfit small calibration sets. NumPy is pinned to 2.3.5, which includes the [upstream Apple Silicon matrix-operation warning fix](https://github.com/numpy/numpy/pull/29223).
+
+Prepared calibrated model results (4,911 eligible pre-fight rows; 4,469 outer out-of-sample rows and 442 warm-up rows):
+
+| Validation | Accuracy | Precision | Brier score | Log-loss | Baseline Brier |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Five temporal folds, unweighted mean | 57.86% | 56.76% | 0.2408 | 0.6745 | 0.2502 |
+| Pooled outer out-of-sample | 58.13% | 56.70% | 0.2404 | 0.6736 | 0.2502 |
+| Chronological holdout, from 2023-02-11 | 61.34% | 59.85% | 0.2346 | 0.6619 | 0.2501 |
+
+These evaluate fight predictions, **not betting returns against historical executable Kalshi quotes**. Calibration does not guarantee perfectly calibrated probabilities, Brier below 0.2500 on future samples, or profitable trades. A constant 50% prediction scores 0.2500; the report also uses each fold’s training prevalence as a stronger comparison. Opponent strength, weight class, injuries, and fight-week information remain omitted. Historical executable-quote and fee backtesting is still needed to assess monetary performance. Fighters with fewer than two complete earlier recorded bouts are shown under unavailable predictions.
 
 ## Bet accounting
 
@@ -177,6 +201,8 @@ python -m pip check
 
 Tests use temporary SQLite databases and synthetic fixtures only. They do not place orders, contact live APIs, or write fake bets into the personal journal. The live connector and trained model were also checked separately against actual Kalshi quotes, and the application was inspected in a browser. `requirements.lock.txt` captures the complete tested environment for reproducibility on Python 3.12; `requirements.txt` pins the direct dependencies.
 
+The repository is connected to [Tonys-Coding/UFC-Predicter](https://github.com/Tonys-Coding/UFC-Predicter). `AGENTS.md` records the requested workflow: verify completed changes, commit, and push to the configured upstream, while keeping credentials and personal data local.
+
 ## Source references
 
 - [UFCStats](http://ufcstats.com/statistics/events/completed?page=all): original fight and fighter statistics.
@@ -186,5 +212,6 @@ Tests use temporary SQLite databases and synthetic fixtures only. They do not pl
 - [Kalshi Get Markets](https://docs.kalshi.com/api-reference/market/get-markets): dollar prices, statuses, and pagination.
 - [Kalshi Get Milestones](https://docs.kalshi.com/api-reference/milestone/get-milestones): fight schedules and underlying-event status.
 - [Kalshi SDK overview](https://docs.kalshi.com/sdks/overview): current package names and direct-integration guidance.
+- [scikit-learn CalibratedClassifierCV](https://scikit-learn.org/1.6/modules/generated/sklearn.calibration.CalibratedClassifierCV.html): held-out probability calibration and ensemble behavior.
 
 This project is configured for a single user on localhost. Public or shared deployment requires a separate authentication and operational design.

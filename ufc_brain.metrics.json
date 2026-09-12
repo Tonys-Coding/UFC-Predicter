@@ -1,0 +1,510 @@
+{
+  "artifact_version": 2,
+  "feature_version": "pre-fight-eight-v2",
+  "feature_columns": [
+    "reach_diff",
+    "strike_diff",
+    "td_diff",
+    "age_diff",
+    "win_streak_diff",
+    "finish_rate_diff",
+    "strike_diff_moving",
+    "td_def_diff_moving"
+  ],
+  "raw_input_columns": [
+    "a_reach",
+    "a_age",
+    "a_slpm",
+    "a_sapm",
+    "a_td_acc",
+    "a_td_def",
+    "a_win_streak",
+    "a_finish_rate",
+    "a_sig_strike_differential_moving",
+    "a_takedown_defense_moving",
+    "b_reach",
+    "b_age",
+    "b_slpm",
+    "b_sapm",
+    "b_td_acc",
+    "b_td_def",
+    "b_win_streak",
+    "b_finish_rate",
+    "b_sig_strike_differential_moving",
+    "b_takedown_defense_moving"
+  ],
+  "trained_at": "2026-09-12T23:46:12.181163+00:00",
+  "algorithm": "random-forest",
+  "sklearn_version": "1.6.1",
+  "training_rows": 4911,
+  "class_counts": {
+    "1": 2474,
+    "0": 2437
+  },
+  "first_fight": "1995-07-14",
+  "last_fight": "2026-09-05",
+  "provenance": "pre-fight career and last-three-bout metrics; strictly earlier event dates; static reach and DOB",
+  "retrospective": false,
+  "validation_strategy": "five expanding windows grouped by event date; nested temporal calibration",
+  "calibration_method": "sigmoid",
+  "calibration_ensemble": true,
+  "final_calibration_splits": [
+    {
+      "train_rows": 793,
+      "test_rows": 1232,
+      "train_first_date": "1995-07-14",
+      "train_last_date": "2012-06-01",
+      "test_first_date": "2012-06-08",
+      "test_last_date": "2017-07-08"
+    },
+    {
+      "train_rows": 2025,
+      "test_rows": 1364,
+      "train_first_date": "1995-07-14",
+      "train_last_date": "2017-07-08",
+      "test_first_date": "2017-07-16",
+      "test_last_date": "2022-03-05"
+    },
+    {
+      "train_rows": 3389,
+      "test_rows": 1522,
+      "train_first_date": "1995-07-14",
+      "train_last_date": "2022-03-05",
+      "test_first_date": "2022-03-12",
+      "test_last_date": "2026-09-05"
+    }
+  ],
+  "imputation": {
+    "scope": "raw-metric medians learned separately inside each base-estimator training split",
+    "final_estimator_medians": [
+      {
+        "reach": 74.0,
+        "age": 29.737776956405675,
+        "slpm": 2.5846932688925257,
+        "sapm": 2.0392636040164414,
+        "td_acc": 0.5,
+        "td_def": 0.5865817091454273,
+        "win_streak": 1.0,
+        "finish_rate": 0.6666666666666666,
+        "sig_strike_differential_moving": 0.5912071522173943,
+        "takedown_defense_moving": 0.6
+      },
+      {
+        "reach": 73.0,
+        "age": 30.38939882406894,
+        "slpm": 2.962871059645253,
+        "sapm": 2.4430508123638814,
+        "td_acc": 0.44594594594594594,
+        "td_def": 0.6363636363636364,
+        "win_streak": 1.0,
+        "finish_rate": 0.6,
+        "sig_strike_differential_moving": 0.5340501792114696,
+        "takedown_defense_moving": 0.6666666666666667
+      },
+      {
+        "reach": 73.0,
+        "age": 30.815143363655654,
+        "slpm": 3.2566250732275526,
+        "sapm": 2.745550611205421,
+        "td_acc": 0.42105263157894735,
+        "td_def": 0.6470588235294117,
+        "win_streak": 1.0,
+        "finish_rate": 0.5555555555555556,
+        "sig_strike_differential_moving": 0.507618558466016,
+        "takedown_defense_moving": 0.6666666666666667
+      }
+    ]
+  },
+  "folds": [
+    {
+      "fold": 1,
+      "accuracy": 0.5409604519774012,
+      "precision": 0.5379188712522046,
+      "brier_score": 0.24589967328876777,
+      "log_loss": 0.6848841052288134,
+      "baseline_brier": 0.24970187476785327,
+      "baseline_log_loss": 0.6925512414702374,
+      "train_rows": 442,
+      "test_rows": 708,
+      "train_first_date": "1995-07-14",
+      "train_last_date": "2009-12-12",
+      "test_first_date": "2010-01-02",
+      "test_last_date": "2014-04-26",
+      "calibration_splits": [
+        {
+          "train_rows": 61,
+          "test_rows": 96,
+          "train_first_date": "1995-07-14",
+          "train_last_date": "2002-09-27",
+          "test_first_date": "2002-11-22",
+          "test_last_date": "2006-10-10"
+        },
+        {
+          "train_rows": 157,
+          "test_rows": 125,
+          "train_first_date": "1995-07-14",
+          "train_last_date": "2006-10-10",
+          "test_first_date": "2006-10-14",
+          "test_last_date": "2008-06-07"
+        },
+        {
+          "train_rows": 282,
+          "test_rows": 160,
+          "train_first_date": "1995-07-14",
+          "train_last_date": "2008-06-07",
+          "test_first_date": "2008-06-21",
+          "test_last_date": "2009-12-12"
+        }
+      ],
+      "uncalibrated": {
+        "accuracy": 0.53954802259887,
+        "precision": 0.5402298850574713,
+        "brier_score": 0.2472129816406764,
+        "log_loss": 0.6873295030752686,
+        "baseline_brier": 0.24970187476785327,
+        "baseline_log_loss": 0.6925512414702374
+      }
+    },
+    {
+      "fold": 2,
+      "accuracy": 0.5714285714285714,
+      "precision": 0.5481099656357389,
+      "brier_score": 0.2443009000043718,
+      "log_loss": 0.6816386544378912,
+      "baseline_brier": 0.2509000486092357,
+      "baseline_log_loss": 0.694949008405272,
+      "train_rows": 1150,
+      "test_rows": 875,
+      "train_first_date": "1995-07-14",
+      "train_last_date": "2014-04-26",
+      "test_first_date": "2014-05-10",
+      "test_last_date": "2017-07-08",
+      "calibration_splits": [
+        {
+          "train_rows": 157,
+          "test_rows": 285,
+          "train_first_date": "1995-07-14",
+          "train_last_date": "2006-10-10",
+          "test_first_date": "2006-10-14",
+          "test_last_date": "2009-12-12"
+        },
+        {
+          "train_rows": 442,
+          "test_rows": 351,
+          "train_first_date": "1995-07-14",
+          "train_last_date": "2009-12-12",
+          "test_first_date": "2010-01-02",
+          "test_last_date": "2012-06-01"
+        },
+        {
+          "train_rows": 793,
+          "test_rows": 357,
+          "train_first_date": "1995-07-14",
+          "train_last_date": "2012-06-01",
+          "test_first_date": "2012-06-08",
+          "test_last_date": "2014-04-26"
+        }
+      ],
+      "uncalibrated": {
+        "accuracy": 0.5691428571428572,
+        "precision": 0.5475352112676056,
+        "brier_score": 0.24551506927641348,
+        "log_loss": 0.684307366149314,
+        "baseline_brier": 0.2509000486092357,
+        "baseline_log_loss": 0.694949008405272
+      }
+    },
+    {
+      "fold": 3,
+      "accuracy": 0.5822222222222222,
+      "precision": 0.5719626168224299,
+      "brier_score": 0.23968630658190118,
+      "log_loss": 0.6722733554089622,
+      "baseline_brier": 0.2500349946654474,
+      "baseline_log_loss": 0.6932171934656013,
+      "train_rows": 2025,
+      "test_rows": 900,
+      "train_first_date": "1995-07-14",
+      "train_last_date": "2017-07-08",
+      "test_first_date": "2017-07-16",
+      "test_last_date": "2020-09-12",
+      "calibration_splits": [
+        {
+          "train_rows": 282,
+          "test_rows": 511,
+          "train_first_date": "1995-07-14",
+          "train_last_date": "2008-06-07",
+          "test_first_date": "2008-06-21",
+          "test_last_date": "2012-06-01"
+        },
+        {
+          "train_rows": 793,
+          "test_rows": 541,
+          "train_first_date": "1995-07-14",
+          "train_last_date": "2012-06-01",
+          "test_first_date": "2012-06-08",
+          "test_last_date": "2015-01-31"
+        },
+        {
+          "train_rows": 1334,
+          "test_rows": 691,
+          "train_first_date": "1995-07-14",
+          "train_last_date": "2015-01-31",
+          "test_first_date": "2015-02-14",
+          "test_last_date": "2017-07-08"
+        }
+      ],
+      "uncalibrated": {
+        "accuracy": 0.5777777777777777,
+        "precision": 0.5630397236614854,
+        "brier_score": 0.240468843431049,
+        "log_loss": 0.6740653108627889,
+        "baseline_brier": 0.2500349946654474,
+        "baseline_log_loss": 0.6932171934656013
+      }
+    },
+    {
+      "fold": 4,
+      "accuracy": 0.5764462809917356,
+      "precision": 0.569811320754717,
+      "brier_score": 0.2400618324721974,
+      "log_loss": 0.6729617277135038,
+      "baseline_brier": 0.2500645481773687,
+      "baseline_log_loss": 0.6932762935834207,
+      "train_rows": 2925,
+      "test_rows": 968,
+      "train_first_date": "1995-07-14",
+      "train_last_date": "2020-09-12",
+      "test_first_date": "2020-09-19",
+      "test_last_date": "2023-08-19",
+      "calibration_splits": [
+        {
+          "train_rows": 442,
+          "test_rows": 708,
+          "train_first_date": "1995-07-14",
+          "train_last_date": "2009-12-12",
+          "test_first_date": "2010-01-02",
+          "test_last_date": "2014-04-26"
+        },
+        {
+          "train_rows": 1150,
+          "test_rows": 875,
+          "train_first_date": "1995-07-14",
+          "train_last_date": "2014-04-26",
+          "test_first_date": "2014-05-10",
+          "test_last_date": "2017-07-08"
+        },
+        {
+          "train_rows": 2025,
+          "test_rows": 900,
+          "train_first_date": "1995-07-14",
+          "train_last_date": "2017-07-08",
+          "test_first_date": "2017-07-16",
+          "test_last_date": "2020-09-12"
+        }
+      ],
+      "uncalibrated": {
+        "accuracy": 0.5857438016528925,
+        "precision": 0.5704584040747029,
+        "brier_score": 0.24161245860283073,
+        "log_loss": 0.6761264697645492,
+        "baseline_brier": 0.2500645481773687,
+        "baseline_log_loss": 0.6932762935834207
+      }
+    },
+    {
+      "fold": 5,
+      "accuracy": 0.6218074656188605,
+      "precision": 0.609981515711645,
+      "brier_score": 0.2340764530072427,
+      "log_loss": 0.6607913610443317,
+      "baseline_brier": 0.2500957364431714,
+      "baseline_log_loss": 0.6933386645204971,
+      "train_rows": 3893,
+      "test_rows": 1018,
+      "train_first_date": "1995-07-14",
+      "train_last_date": "2023-08-19",
+      "test_first_date": "2023-08-26",
+      "test_last_date": "2026-09-05",
+      "calibration_splits": [
+        {
+          "train_rows": 629,
+          "test_rows": 925,
+          "train_first_date": "1995-07-14",
+          "train_last_date": "2011-04-30",
+          "test_first_date": "2011-05-28",
+          "test_last_date": "2015-11-21"
+        },
+        {
+          "train_rows": 1554,
+          "test_rows": 1159,
+          "train_first_date": "1995-07-14",
+          "train_last_date": "2015-11-21",
+          "test_first_date": "2015-11-28",
+          "test_last_date": "2019-11-02"
+        },
+        {
+          "train_rows": 2713,
+          "test_rows": 1180,
+          "train_first_date": "1995-07-14",
+          "train_last_date": "2019-11-02",
+          "test_first_date": "2019-11-09",
+          "test_last_date": "2023-08-19"
+        }
+      ],
+      "uncalibrated": {
+        "accuracy": 0.6159135559921415,
+        "precision": 0.5972461273666093,
+        "brier_score": 0.23383151654215456,
+        "log_loss": 0.6602009896141291,
+        "baseline_brier": 0.2500957364431714,
+        "baseline_log_loss": 0.6933386645204971
+      }
+    }
+  ],
+  "mean_metrics": {
+    "accuracy": 0.5785729984477581,
+    "precision": 0.5675568580353471,
+    "brier_score": 0.24080503307089618,
+    "log_loss": 0.6745098407667005,
+    "baseline_brier": 0.2501594405326153,
+    "baseline_log_loss": 0.6934664802890056
+  },
+  "pooled_oos_metrics": {
+    "accuracy": 0.5813381069590512,
+    "precision": 0.5669691470054447,
+    "brier_score": 0.2403776270106163,
+    "log_loss": 0.6736384754918375,
+    "baseline_brier": 0.25017182980587727,
+    "baseline_log_loss": 0.693491239226941
+  },
+  "oos_rows": 4469,
+  "warmup_rows": 442,
+  "reliability": {
+    "bins": [
+      {
+        "lower": 0.2,
+        "upper": 0.30000000000000004,
+        "count": 1,
+        "mean_predicted": 0.2899139518970957,
+        "observed_win_rate": 1.0
+      },
+      {
+        "lower": 0.30000000000000004,
+        "upper": 0.4,
+        "count": 313,
+        "mean_predicted": 0.37342235322973666,
+        "observed_win_rate": 0.30990415335463256
+      },
+      {
+        "lower": 0.4,
+        "upper": 0.5,
+        "count": 1400,
+        "mean_predicted": 0.45667809313626645,
+        "observed_win_rate": 0.4142857142857143
+      },
+      {
+        "lower": 0.5,
+        "upper": 0.6000000000000001,
+        "count": 2129,
+        "mean_predicted": 0.5457962863594816,
+        "observed_win_rate": 0.5392202912165336
+      },
+      {
+        "lower": 0.6000000000000001,
+        "upper": 0.7000000000000001,
+        "count": 623,
+        "mean_predicted": 0.6308162742236502,
+        "observed_win_rate": 0.6613162118780096
+      },
+      {
+        "lower": 0.7000000000000001,
+        "upper": 0.8,
+        "count": 3,
+        "mean_predicted": 0.7091157001515631,
+        "observed_win_rate": 0.6666666666666666
+      }
+    ],
+    "expected_calibration_error": 0.025300898392982878,
+    "note": "Finite-sample calibration diagnostics; neither perfect calibration nor betting profitability is guaranteed."
+  },
+  "chronological_holdout": {
+    "accuracy": 0.6133553173948887,
+    "precision": 0.5984848484848485,
+    "brier_score": 0.23461313783549434,
+    "log_loss": 0.6618508009787785,
+    "baseline_brier": 0.2501363759909625,
+    "baseline_log_loss": 0.6934199537797153,
+    "cutoff": "2023-02-11",
+    "train_rows": 3698,
+    "test_rows": 1213,
+    "calibration_splits": [
+      {
+        "train_rows": 603,
+        "test_rows": 854,
+        "train_first_date": "1995-07-14",
+        "train_last_date": "2011-02-05",
+        "test_first_date": "2011-02-26",
+        "test_last_date": "2015-07-15"
+      },
+      {
+        "train_rows": 1457,
+        "test_rows": 1124,
+        "train_first_date": "1995-07-14",
+        "train_last_date": "2015-07-15",
+        "test_first_date": "2015-07-18",
+        "test_last_date": "2019-06-08"
+      },
+      {
+        "train_rows": 2581,
+        "test_rows": 1117,
+        "train_first_date": "1995-07-14",
+        "train_last_date": "2019-06-08",
+        "test_first_date": "2019-06-22",
+        "test_last_date": "2023-02-04"
+      }
+    ],
+    "reliability": {
+      "bins": [
+        {
+          "lower": 0.30000000000000004,
+          "upper": 0.4,
+          "count": 146,
+          "mean_predicted": 0.3691860239217721,
+          "observed_win_rate": 0.3013698630136986
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.5,
+          "count": 407,
+          "mean_predicted": 0.4496025785621141,
+          "observed_win_rate": 0.3931203931203931
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6000000000000001,
+          "count": 414,
+          "mean_predicted": 0.549684768193701,
+          "observed_win_rate": 0.538647342995169
+        },
+        {
+          "lower": 0.6000000000000001,
+          "upper": 0.7000000000000001,
+          "count": 243,
+          "mean_predicted": 0.6375649352852829,
+          "observed_win_rate": 0.6995884773662552
+        },
+        {
+          "lower": 0.7000000000000001,
+          "upper": 0.8,
+          "count": 3,
+          "mean_predicted": 0.7092761896746649,
+          "observed_win_rate": 0.6666666666666666
+        }
+      ],
+      "expected_calibration_error": 0.04341174962428004,
+      "note": "Finite-sample calibration diagnostics; neither perfect calibration nor betting profitability is guaranteed."
+    }
+  },
+  "dataset_sha256": "a70578e266e48dcd20f66de59823fc420389bb7ad625d10aabb7abe0e41fb7cf"
+}

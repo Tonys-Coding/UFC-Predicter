@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 
 import numpy as np
 import pandas as pd
@@ -37,8 +38,6 @@ def evaluate_markets(markets: pd.DataFrame, model, db: Database | None = None) -
     db = db or Database()
     scraper = UFCScraper(db)
     profiles, errors = {}, {}
-    stats = db.statistics()
-    prior_counts = stats.groupby("fighter_id").size().to_dict() if not stats.empty else {}
     output = []
     try:
         for row in markets.to_dict("records"):
@@ -62,20 +61,23 @@ def evaluate_markets(markets: pd.DataFrame, model, db: Database | None = None) -
                             errors[name] = str(exc)
                             raise
                 a, b = profiles[row["fighter_name"]], profiles[row["opponent_name"]]
-                if not model.ufc_metadata_.get("retrospective", True):
-                    for profile in (a, b):
-                        if prior_counts.get(profile["fighter_id"], 0) < 2:
-                            raise ValueError(
-                                f"{profile['name']} has fewer than two locally recorded bouts; outside model training coverage."
-                            )
-                probability = predict_matchup(model, a, b, row["start_time"])
+                # The event's nominal date can differ from the UTC start date for late cards.
+                match = re.match(r"^KX(?:UFC|MMA)FIGHT-(\d{2}[A-Z]{3}\d{2})", row["event_ticker"])
+                event_date = (
+                    pd.to_datetime(match[1], format="%y%b%d", errors="coerce") if match else pd.NaT
+                )
+                if pd.isna(event_date):
+                    raise ValueError(
+                        "Cannot verify the event's calendar date for historical features."
+                    )
+                probability = predict_matchup(model, a, b, event_date.date().isoformat(), db=db)
                 result.update(
                     {
                         "our_probability": probability,
                         **contract_value(probability, row["kalshi_probability"]),
-                        "profile_source": "Archive aggregates"
+                        "profile_source": "Earlier bouts + archived reach/DOB"
                         if any(p.get("source", "").startswith("archive") for p in (a, b))
-                        else "UFCStats profiles",
+                        else "Earlier bouts + UFCStats reach/DOB",
                     }
                 )
             except (ScrapeError, ValueError, KeyError) as exc:

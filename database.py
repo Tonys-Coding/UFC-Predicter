@@ -57,6 +57,8 @@ CREATE TABLE IF NOT EXISTS historical_fights (
     last_updated TEXT NOT NULL, CHECK(fighter_a_id != fighter_b_id)
 );
 CREATE INDEX IF NOT EXISTS idx_fight_date ON historical_fights(date);
+CREATE INDEX IF NOT EXISTS idx_fight_a_date ON historical_fights(fighter_a_id, date);
+CREATE INDEX IF NOT EXISTS idx_fight_b_date ON historical_fights(fighter_b_id, date);
 CREATE TABLE IF NOT EXISTS fight_statistics (
     fight_id TEXT NOT NULL REFERENCES historical_fights(fight_id),
     fighter_id TEXT NOT NULL, sig_landed INTEGER NOT NULL CHECK(sig_landed >= 0),
@@ -217,6 +219,25 @@ class Database:
 
     def fights(self) -> pd.DataFrame:
         return self._read("SELECT * FROM historical_fights ORDER BY date, fight_id")
+
+    def pre_fight_history(self, fighter_id: str, before_date: str) -> list[dict]:
+        """Include every earlier result, even when its statistics are missing."""
+        with self.connection() as con:
+            rows = con.execute(
+                """SELECT f.*, s.sig_landed, s.sig_attempted, s.td_landed, s.td_attempted,
+                          s.duration_seconds, o.sig_landed AS opp_sig_landed,
+                          o.sig_attempted AS opp_sig_attempted, o.td_landed AS opp_td_landed,
+                          o.td_attempted AS opp_td_attempted,
+                          o.duration_seconds AS opp_duration_seconds
+                   FROM historical_fights f
+                   LEFT JOIN fight_statistics s ON s.fight_id=f.fight_id AND s.fighter_id=?
+                   LEFT JOIN fight_statistics o ON o.fight_id=f.fight_id
+                     AND o.fighter_id=CASE WHEN f.fighter_a_id=? THEN f.fighter_b_id ELSE f.fighter_a_id END
+                   WHERE (f.fighter_a_id=? OR f.fighter_b_id=?) AND f.date < ?
+                   ORDER BY f.date, f.fight_id""",
+                (fighter_id, fighter_id, fighter_id, fighter_id, before_date),
+            ).fetchall()
+        return [dict(row) for row in rows]
 
     def bets(self) -> pd.DataFrame:
         frame = self._read("SELECT * FROM betting_history ORDER BY date DESC, id DESC")

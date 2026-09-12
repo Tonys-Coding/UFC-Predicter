@@ -7,8 +7,11 @@ from pathlib import Path
 import joblib
 import numpy as np
 import sklearn
+from sklearn.calibration import CalibratedClassifierCV
 
-from features import FEATURE_COLUMNS, FEATURE_VERSION, matchup_features
+from database import Database
+from features import FEATURE_COLUMNS, FEATURE_VERSION, matchup_raw_inputs
+from historical_features import compute_pre_fight_metrics
 from settings import MODEL_PATH
 
 
@@ -32,17 +35,36 @@ def load_model(path: str | Path = MODEL_PATH):
         )
     if not hasattr(model, "predict_proba") or list(model.classes_) != [0, 1]:
         raise ValueError("Model must be a binary probability classifier with classes [0, 1].")
+    if not isinstance(model, CalibratedClassifierCV) or not getattr(
+        model, "calibrated_classifiers_", None
+    ):
+        raise ValueError(
+            "Model must be a fitted CalibratedClassifierCV artifact. Retrain before use."
+        )
     return model
 
 
-def predict_matchup(model, fighter: dict, opponent: dict, on_date: str) -> float:
+def predict_matchup(
+    model, fighter: dict, opponent: dict, on_date: str, *, db: Database | None = None
+) -> float:
     if fighter["fighter_id"] == opponent["fighter_id"]:
         raise ValueError("A fighter cannot be matched against themselves.")
     # The same canonical A/B order is used in historical training. Both contracts share
     # one prediction, so their model probabilities sum to one despite asymmetric td_diff.
     a, b = sorted((fighter, opponent), key=lambda item: item["fighter_id"])
-    features = matchup_features(a, b, model.ufc_metadata_["demographic_medians"], on_date)
-    probability = float(model.predict_proba(features)[0, 1])
+    db = db or Database()
+    enriched = []
+    for profile in (a, b):
+        metrics = compute_pre_fight_metrics(profile["fighter_id"], on_date, db=db)
+        if metrics["stats_bouts"] < 2:
+            raise ValueError(
+                f"{profile['name']} has fewer than two recorded bouts before this event date."
+            )
+        enriched.append({**profile, **metrics})
+    # Each calibrated pipeline learns its own imputation values and creates the same
+    # eight-feature matrix. Never prefill from full-data medians outside that pipeline.
+    inputs = matchup_raw_inputs(*enriched, on_date)
+    probability = float(model.predict_proba(inputs)[0, 1])
     if not np.isfinite(probability) or not 0 <= probability <= 1:
         raise ValueError("Model produced an invalid probability.")
     return probability if fighter["fighter_id"] == a["fighter_id"] else 1 - probability

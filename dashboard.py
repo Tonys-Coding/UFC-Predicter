@@ -232,18 +232,36 @@ def render_model_details(model) -> None:
             f"Trained {local_time(meta['trained_at'])} · {meta['training_rows']:,} bouts · {meta['first_fight']} to {meta['last_fight']}"
         )
         mean = meta["mean_metrics"]
-        a, b, c = st.columns(3)
+        a, b, c, d = st.columns(4)
         a.metric("CV accuracy", f"{mean['accuracy']:.1%}")
         b.metric("CV precision", f"{mean['precision']:.1%}")
         c.metric("CV Brier score", f"{mean['brier_score']:.3f}")
+        d.metric("CV log-loss", f"{mean['log_loss']:.3f}" if "log_loss" in mean else "—")
         temporal = meta.get("chronological_holdout")
         if temporal:
             st.caption(
                 f"Chronological holdout from {temporal['cutoff']}: accuracy {temporal['accuracy']:.1%}, Brier {temporal['brier_score']:.3f}; constant-probability baseline {temporal['baseline_brier']:.3f}."
             )
         st.caption(meta["provenance"])
+        if meta.get("calibration_method"):
+            st.caption(
+                f"Eight features · {meta['calibration_method']} calibration · {meta['oos_rows']:,} out-of-sample predictions across five chronological windows."
+            )
+        reliability = meta.get("reliability", {}).get("bins")
+        if reliability:
+            st.dataframe(
+                pd.DataFrame(reliability).rename(
+                    columns={
+                        "mean_predicted": "Mean model probability",
+                        "observed_win_rate": "Observed win rate",
+                        "count": "Fights",
+                    }
+                ),
+                hide_index=True,
+                use_container_width=True,
+            )
         st.caption(
-            "Brier measures probability error; lower is better. Shuffled folds can share fighters. The chronological holdout is the stronger check for future performance. Four statistical features do not capture injuries, opponent strength, or fight-week changes."
+            "Brier and log-loss measure probability error; lower is better. Training and calibration use only earlier event dates. Calibration is evaluated on unseen fights and cannot guarantee perfect probabilities. These features do not capture injuries, opponent strength, or fight-week changes."
         )
         if meta.get("retrospective"):
             st.warning(

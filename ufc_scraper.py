@@ -22,7 +22,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 from database import Database, normalize_name, utc_now
-from features import RATE_FIELDS, age_on, demographic_medians, differential_frame
+from features import RATE_FIELDS, age_on
 from parsing import count_pair, duration_seconds
 from settings import CACHE_DIR, DB_PATH, configure_logging
 
@@ -416,67 +416,15 @@ class UFCScraper:
 
 
 def get_training_dataframe(db_path: str | Path = DB_PATH, *, impute: bool = True) -> pd.DataFrame:
-    """Join latest career snapshots to outcomes. This is retrospective, not point-in-time data.
+    """Export eight differentials and their raw A/B inputs using strictly earlier bouts.
 
-    The trainer passes impute=False and learns medians within each training fold.
-    Default exports fill raw reach/age from dataset medians as requested.
+    Training passes impute=False. Each nested calibration estimator then learns its own
+    raw-metric medians before constructing the eight-feature matrix. Current career
+    snapshots are never substituted when historical bout statistics are unavailable.
     """
-    db = Database(db_path)
-    if not db.statistics().empty:
-        from historical_features import asof_training_dataframe
+    from historical_features import asof_training_dataframe
 
-        return asof_training_dataframe(db, impute=impute)
-    fights, profiles = db.fights(), db.profiles()
-    if fights.empty or profiles.empty:
-        raise ValueError("No training data. Run ufc_scraper.py --events 30 first.")
-    valid = fights.winner_id.notna() & (
-        (fights.winner_id == fights.fighter_a_id) | (fights.winner_id == fights.fighter_b_id)
-    )
-    fights = fights[valid].drop_duplicates("fight_id").copy()
-    if fights.empty:
-        raise ValueError("No decisive bouts are available; draws and no contests are excluded.")
-    for side in ("a", "b"):
-        renamed = profiles.rename(
-            columns={column: f"{side}_{column}" for column in profiles.columns}
-        )
-        fights = fights.merge(
-            renamed,
-            how="left",
-            left_on=f"fighter_{side}_id",
-            right_on=f"{side}_fighter_id",
-            validate="many_to_one",
-        )
-        fights[f"{side}_age"] = [
-            age_on(
-                row.get(f"{side}_dob"),
-                row["date"],
-                row.get(f"{side}_age"),
-                row.get(f"{side}_last_updated"),
-            )
-            for row in fights.to_dict("records")
-        ]
-    required = [f"{side}_{field}" for side in ("a", "b") for field in RATE_FIELDS]
-    for column in required:
-        fights[column] = pd.to_numeric(fights[column], errors="coerce").replace(
-            [np.inf, -np.inf], np.nan
-        )
-    before = len(fights)
-    fights = fights.dropna(subset=required).reset_index(drop=True)
-    if before != len(fights):
-        log.warning("Excluded %d bouts with missing career rate statistics", before - len(fights))
-    if fights.empty:
-        raise ValueError("No bouts have usable career statistics for both fighters.")
-    medians = demographic_medians(fights) if impute else None
-    if medians:
-        for side in ("a", "b"):
-            for field, value in medians.items():
-                fights[f"{side}_{field}"] = pd.to_numeric(
-                    fights[f"{side}_{field}"], errors="coerce"
-                ).fillna(value)
-    fights["y"] = (fights.winner_id == fights.fighter_a_id).astype(int)
-    fights = pd.concat([fights, differential_frame(fights, medians)], axis=1)
-    fights.attrs["feature_provenance"] = "latest-career-snapshots; retrospective leakage risk"
-    return fights
+    return asof_training_dataframe(Database(db_path), impute=impute)
 
 
 def main() -> int:

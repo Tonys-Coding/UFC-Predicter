@@ -53,7 +53,25 @@ def test_trained_dashboard_renders_nested_trade_controls(tmp_path, monkeypatch, 
                 "last_fight": "2025-01-01",
                 "provenance": "test fixture",
                 "retrospective": False,
-                "mean_metrics": {"accuracy": 0.6, "precision": 0.6, "brier_score": 0.24},
+                "mean_metrics": {
+                    "accuracy": 0.6,
+                    "precision": 0.6,
+                    "brier_score": 0.24,
+                    "log_loss": 0.67,
+                },
+                "calibration_method": "sigmoid",
+                "oos_rows": 80,
+                "reliability": {
+                    "bins": [
+                        {
+                            "lower": 0.5,
+                            "upper": 0.6,
+                            "count": 80,
+                            "mean_predicted": 0.55,
+                            "observed_win_rate": 0.56,
+                        }
+                    ]
+                },
             }
         },
     )()
@@ -81,3 +99,5 @@ def test_trained_dashboard_renders_nested_trade_controls(tmp_path, monkeypatch, 
     ).run()
     assert not app.exception
     assert sum(b.label == "Log Bet" for b in app.button) == 3
+    assert next(metric for metric in app.metric if metric.label == "CV log-loss").value == "0.670"
+    assert any("sigmoid calibration" in caption.value for caption in app.caption)
