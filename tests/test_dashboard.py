@@ -1,13 +1,21 @@
 from pathlib import Path
 
 import pandas as pd
+import pytest
 from streamlit.testing.v1 import AppTest
 
 import analytics
+import espn_client
 import kalshi_mma_client
 import modeling
 import settings
 from database import Database, utc_now
+
+
+@pytest.fixture(autouse=True)
+def offline_espn(monkeypatch):
+    monkeypatch.setattr(espn_client.ESPNClient, "scoreboard", lambda _: [])
+    monkeypatch.setattr(espn_client.ESPNClient, "news", lambda _: [])
 
 
 def test_dashboard_log_and_settle_with_isolated_database(tmp_path, monkeypatch, event):
@@ -83,7 +91,7 @@ def test_trained_dashboard_renders_nested_trade_controls(tmp_path, monkeypatch, 
         kalshi_mma_client.KalshiMMAClient, "get_upcoming_ufc_markets", lambda _: markets
     )
 
-    def analyze(frame, _model):
+    def analyze(frame, _model, **kwargs):
         return frame.assign(
             our_probability=0.75,
             edge=0.15,
@@ -98,6 +106,11 @@ def test_trained_dashboard_renders_nested_trade_controls(tmp_path, monkeypatch, 
         str(Path(__file__).parents[1] / "dashboard.py"), default_timeout=20
     ).run()
     assert not app.exception
-    assert sum(b.label == "Log Bet" for b in app.button) == 3
+    assert sum(b.label == "Log Bet" for b in app.button) == 2
     assert next(metric for metric in app.metric if metric.label == "CV log-loss").value == "0.670"
     assert any("sigmoid calibration" in caption.value for caption in app.caption)
+
+    app.radio[0].set_value("Better-supported edges").run()
+    assert not app.exception
+    assert not any(b.label == "Log Bet" for b in app.button)
+    assert any("No contracts meet" in message.value for message in app.info)

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import html
 import logging
 from uuid import uuid4
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
@@ -11,8 +10,10 @@ import pandas as pd
 import streamlit as st
 
 from analytics import evaluate_markets
+from context_ui import render_context
 from database import Database
-from kalshi_mma_client import KalshiError, KalshiMMAClient
+from live_analysis import annotate_support, include_scheduled
+from live_collection import Collector
 from modeling import load_model
 from settings import DB_PATH, MODEL_PATH, TIMEZONE, configure_logging
 
@@ -62,33 +63,41 @@ def cached_model(path: str, modified_ns: int):
     return load_model(path)
 
 
-@st.cache_data(ttl=60, show_spinner=False)
 def fetch_markets() -> tuple[pd.DataFrame, str | None]:
-    client = KalshiMMAClient()
-    try:
-        return client.get_upcoming_ufc_markets(), None
-    except KalshiError as exc:
-        cached = client.load_cached_markets()
-        if cached is not None:
-            return cached, str(exc)
-        raise
-    finally:
-        client.close()
+    return Collector(Database(DB_PATH)).kalshi()
 
 
 @st.cache_data(
     ttl=300,
     show_spinner=False,
     hash_funcs={
-        pd.DataFrame: lambda frame: frame[
-            ["ticker", "fighter_name", "opponent_name", "start_time"]
-        ].to_json()
+        pd.DataFrame: lambda frame: frame.reindex(
+            columns=[
+                "ticker",
+                "fighter_name",
+                "opponent_name",
+                "start_time",
+                "weight_class",
+                "scheduled_rounds",
+                "model_event_date",
+            ]
+        ).to_json()
     },
 )
 def analyze_snapshot(markets: pd.DataFrame, model_modified: int, _model) -> pd.DataFrame:
-    # Cache only probabilities by matchup identity; price changes must always reprice EV.
-    analyzed = evaluate_markets(markets, _model)
-    return analyzed[["ticker", "our_probability", "analysis_status", "profile_source"]]
+    analyzed = evaluate_markets(markets, _model, db=Database(DB_PATH))
+    return analyzed.reindex(
+        columns=[
+            "ticker",
+            "our_probability",
+            "analysis_status",
+            "profile_source",
+            "fighter_id",
+            "opponent_id",
+            "min_prior_complete_bouts",
+            "recent_complete",
+        ]
+    )
 
 
 def sidebar(db: Database) -> int:
@@ -102,9 +111,8 @@ def sidebar(db: Database) -> int:
             format="%d%%",
             help="Difference in percentage points between model win probability and the YES buy price.",
         )
-        st.caption("Only edges above this threshold appear in the trade list.")
+        st.caption("The threshold applies to Better-supported edges. All matchups remain visible.")
         if st.button("Refresh live markets", use_container_width=True, type="primary"):
-            fetch_markets.clear()
             analyze_snapshot.clear()
         st.divider()
         st.markdown("**Local data**")
@@ -139,26 +147,34 @@ def sidebar(db: Database) -> int:
                 finally:
                     scraper.close()
             if st.button("Import public archive", use_container_width=True):
-                from bootstrap_data import DEFAULT_COMMIT, download_archive, import_archive
+                from bootstrap_data import DEFAULT_COMMIT, download_archive
+                from data_audit import reconcile
 
                 try:
                     with st.spinner("Importing the pinned UFCStats archive…"):
                         directory, manifest = download_archive(DEFAULT_COMMIT)
-                        result = import_archive(directory, manifest, db)
+                        result = reconcile(directory, manifest, db)
                     analyze_snapshot.clear()
-                    st.success(f"Imported {result['fights']:,} historical fights.")
+                    st.success("Audited archive imported; existing records and journal preserved.")
                 except Exception:
                     log.exception("Dashboard archive import failed")
                     st.error("Archive import failed. The application log contains details.")
             if st.button("Train model", use_container_width=True):
-                from train_ufc_model import train_model
+                from model_experiments import run_experiments
 
                 try:
-                    with st.spinner("Validating five folds and training the model…"):
-                        result = train_model()
+                    with st.spinner("Comparing models across five earlier annual windows…"):
+                        result = run_experiments(db_path=DB_PATH, model_path=MODEL_PATH)
                     cached_model.clear()
                     analyze_snapshot.clear()
-                    st.success(f"Model trained on {result['training_rows']:,} fights.")
+                    st.success(
+                        "Comparison saved. "
+                        + (
+                            "Qualified model promoted."
+                            if result["promotion"]["promoted"]
+                            else "Existing model retained."
+                        )
+                    )
                 except Exception as exc:
                     log.exception("Dashboard model training failed")
                     st.error(str(exc))
@@ -240,15 +256,27 @@ def render_model_details(model) -> None:
         temporal = meta.get("chronological_holdout")
         if temporal:
             st.caption(
-                f"Chronological holdout from {temporal['cutoff']}: accuracy {temporal['accuracy']:.1%}, Brier {temporal['brier_score']:.3f}; constant-probability baseline {temporal['baseline_brier']:.3f}."
+                f"Retrospective comparison from {temporal['cutoff']}: accuracy {temporal['accuracy']:.1%}, Brier {temporal['brier_score']:.3f}; constant-probability baseline {temporal['baseline_brier']:.3f}."
             )
         st.caption(meta["provenance"])
         if meta.get("calibration_method"):
             st.caption(
-                f"Eight features · {meta['calibration_method']} calibration · {meta['oos_rows']:,} out-of-sample predictions across five chronological windows."
+                f"{', '.join(meta.get('feature_groups', ['eight baseline features']))} · {meta['calibration_method']} calibration · {meta['oos_rows']:,} out-of-sample predictions across five chronological windows."
             )
+        if meta.get("feature_groups"):
+            st.caption(
+                "Previously inspected historical data; this comparison is not a pristine holdout or evidence of profitable fills."
+            )
+            for split in meta.get("final_calibration_splits", []):
+                st.caption(
+                    f"Underlying model trained through {split['train_last_date']}; frozen and calibrated on {split['calibration_first_date']}–{split['calibration_last_date']}."
+                )
         reliability = meta.get("reliability", {}).get("bins")
         if reliability:
+            curve = pd.DataFrame(reliability).set_index("mean_predicted")[["observed_win_rate"]]
+            curve.columns = ["Observed win rate"]
+            curve["Ideal calibration"] = curve.index
+            st.line_chart(curve, height=220)
             st.dataframe(
                 pd.DataFrame(reliability).rename(
                     columns={
@@ -261,7 +289,7 @@ def render_model_details(model) -> None:
                 use_container_width=True,
             )
         st.caption(
-            "Brier and log-loss measure probability error; lower is better. Training and calibration use only earlier event dates. Calibration is evaluated on unseen fights and cannot guarantee perfect probabilities. These features do not capture injuries, opponent strength, or fight-week changes."
+            "Brier and log-loss measure probability error; lower is better. Training and calibration use only earlier event dates. Calibration is evaluated on unseen fights and cannot guarantee perfect probabilities. Fight-week reporting is displayed separately and does not adjust these estimates."
         )
         if meta.get("retrospective"):
             st.warning(
@@ -271,37 +299,24 @@ def render_model_details(model) -> None:
 
 @st.fragment(run_every=60)
 def render_live(db: Database, minimum: int) -> None:
-    try:
-        with st.spinner("Reading UFC market quotes…"):
-            markets, feed_error = fetch_markets()
-    except KalshiError as exc:
-        st.error(str(exc))
-        st.info("Betting history remains available in the second tab.")
-        return
+    collector = Collector(db)
+    with st.spinner("Reading market quotes and bout status…"):
+        markets, feed_error = fetch_markets()
+        status, news = collector.espn()
+        bouts = collector.latest_bouts()
     if markets.attrs.get("stale"):
         st.warning(
-            f"Market feed unavailable: {feed_error} Showing cached quotes from {local_time(markets.attrs['fetched_at'])}. Refresh to calculate live edges."
+            f"Market feed stale or unavailable: {feed_error or 'No recent response'}. Cached prices cannot qualify as supported edges."
         )
-        st.dataframe(
-            markets[["fighter_name", "opponent_name", "kalshi_probability", "ticker"]],
-            hide_index=True,
-            use_container_width=True,
-        )
-        return
-    # A cached response may still contain a contract whose scheduled start has passed.
-    now = pd.Timestamp.now(tz="UTC")
-    markets = markets[
-        (pd.to_datetime(markets.start_time, utc=True) > now)
-        & (pd.to_datetime(markets.close_time, utc=True) > now)
-    ].copy()
-    st.caption(
-        f"Updated {local_time(markets.attrs.get('fetched_at', now.isoformat()))} · YES buy prices · USD"
-    )
+    markets = include_scheduled(markets, bouts)
     if markets.empty:
-        st.info(
-            "No quoted upcoming UFC winner contracts are currently available. Refresh closer to the next card."
-        )
+        st.info("No upcoming matchups are available from the current market and schedule feeds.")
+        render_context(collector, bouts, status, news)
         return
+    quote_at = markets.attrs.get("fetched_at")
+    st.caption(
+        f"Quotes collected {local_time(quote_at) if quote_at else 'not yet'} · YES buy prices · USD"
+    )
     model = None
     try:
         modified = MODEL_PATH.stat().st_mtime_ns
@@ -310,130 +325,113 @@ def render_live(db: Database, minimum: int) -> None:
         st.info(str(exc))
     except Exception:
         log.exception("Unable to load model artifact")
-        st.error("The saved model could not be loaded. Retrain using Data & model controls.")
-    if model is None:
-        st.dataframe(
-            markets[["fighter_name", "opponent_name", "kalshi_probability", "ticker"]],
-            use_container_width=True,
-            hide_index=True,
-            column_config={
-                "kalshi_probability": st.column_config.NumberColumn(
-                    "YES buy price", format="percent"
-                )
-            },
+        st.error(
+            "The saved model could not be loaded. Run model comparison from Data & model controls."
         )
-        with st.expander("Log a manual trade"):
-            ticker = st.selectbox(
-                "Market",
-                markets.ticker.tolist(),
-                format_func=lambda t: markets.set_index("ticker").loc[t, "fighter_name"],
-            )
-            log_trade_form(
-                db,
-                markets.set_index("ticker", drop=False).loc[ticker].to_dict(),
-                key_prefix="unmodeled",
-            )
-        return
-    with st.spinner("Calculating matchup probabilities…"):
-        predictions = analyze_snapshot(markets, modified, model)
-    analyzed = markets.merge(predictions, on="ticker", how="left", validate="one_to_one")
+    if model is not None:
+        with st.spinner("Calculating statistical probabilities…"):
+            predictions = analyze_snapshot(markets, modified, model)
+        analyzed = markets.merge(predictions, on="ticker", how="left", validate="one_to_one")
+    else:
+        analyzed = markets.assign(
+            our_probability=float("nan"),
+            analysis_status="No validated local model",
+            fighter_id=None,
+            opponent_id=None,
+            min_prior_complete_bouts=0,
+            recent_complete=False,
+        )
     analyzed["edge"] = analyzed.our_probability - analyzed.kalshi_probability
     analyzed["ev_per_contract"] = analyzed.edge
     analyzed["roi"] = analyzed.edge / analyzed.kalshi_probability
-    ready = analyzed[analyzed.our_probability.notna()].copy()
-    edges = ready[ready.edge >= minimum / 100].sort_values("edge", ascending=False)
-    a, b, c, d = st.columns(4)
-    a.metric("Live contracts", f"{len(markets):,}")
-    b.metric("Analyzed", f"{len(ready):,}")
-    c.metric("Above edge filter", f"{len(edges):,}")
-    d.metric("Best model edge", f"{ready.edge.max() * 100:+.1f} pp" if not ready.empty else "—")
-    st.markdown("### Live Edge Finder")
-    st.caption(
-        "Edge = model probability − YES buy price. EV is expected profit on one $1-payout contract before fees and slippage. These are model estimates."
+    analyzed = annotate_support(
+        analyzed,
+        bouts,
+        collector,
+        quote_at,
+        feed_stale=bool(markets.attrs.get("stale")) or bool(status.get("stale")),
     )
-    if model.ufc_metadata_.get("retrospective"):
-        st.warning("Current-snapshot model: retrospective validation. See model details below.")
-    if edges.empty:
-        st.info(f"No analyzed contracts clear your {minimum}% edge filter.")
+    if model is not None:
+        version = model.ufc_metadata_.get("model_version", str(modified))
+        collector.record_predictions(analyzed, version, quote_at)
+    ready = analyzed[analyzed.our_probability.notna()]
+    supported = analyzed[analyzed.supported & (analyzed.edge >= minimum / 100)]
+    a, b, c, d = st.columns(4)
+    a.metric("Available contracts / sides", len(analyzed))
+    b.metric("Analyzed", len(ready))
+    c.metric("Better-supported edges", len(supported))
+    best = ready.edge.max()
+    d.metric("Best model edge", f"{best * 100:+.1f} pp" if pd.notna(best) else "—")
+    view = st.radio("Matchup view", ["All matchups", "Better-supported edges"], horizontal=True)
+    st.caption(
+        "Our statistical probability is independent of betting prices. Edge = probability − YES ask; EV is per $1-payout contract before fees and slippage. Midpoint is a market estimate, not an executable price."
+    )
+    st.caption(
+        "Better-supported edges require five complete prior bouts per fighter, complete recent-three core statistics, fresh quotes and verified status, and no unresolved identity or material change. These are data-quality filters, not confidence intervals."
+    )
+    visible = (analyzed if view == "All matchups" else supported).sort_values(
+        "edge", ascending=False
+    )
+    if visible.empty:
+        st.info(f"No contracts meet the data-quality requirements and {minimum}% minimum edge.")
     else:
-        headings = st.columns([2.3, 0.85, 0.85, 0.9, 2.5])
-        for column, label in zip(
-            headings,
-            ["FIGHTER / MATCHUP", "KALSHI", "OUR MODEL", "EDGE / EV", "MANUAL TRADE"],
-            strict=True,
-        ):
-            column.markdown(f'<div class="table-head">{label}</div>', unsafe_allow_html=True)
-        for row in edges.to_dict("records"):
-            with st.container(border=True):
-                columns = st.columns([2.3, 0.85, 0.85, 0.9, 2.5], vertical_alignment="center")
-                with columns[0]:
-                    st.markdown(
-                        f'<div class="fighter">{html.escape(row["fighter_name"])}</div><div class="muted">vs {html.escape(row["opponent_name"])}<br>{html.escape(local_time(row["start_time"]))}</div>',
-                        unsafe_allow_html=True,
-                    )
-                    st.caption(row["ticker"])
-                columns[1].markdown(
-                    f'<div class="quote">{row["kalshi_probability"]:.0%}</div><div class="tiny-label">YES ask</div>',
-                    unsafe_allow_html=True,
-                )
-                columns[2].markdown(
-                    f'<div class="quote">{row["our_probability"]:.1%}</div><div class="tiny-label">Win probability</div>',
-                    unsafe_allow_html=True,
-                )
-                columns[3].markdown(
-                    f'<div class="quote positive">+{row["edge"] * 100:.1f} pp</div><div class="muted positive">+${row["ev_per_contract"]:.3f} EV</div>',
-                    unsafe_allow_html=True,
-                )
-                with columns[4]:
-                    log_trade_form(db, row)
-    with st.expander(f"All analyzed contracts ({len(ready)})"):
-        if not ready.empty:
-            display = ready.sort_values("edge", ascending=False)[
-                [
-                    "fighter_name",
-                    "opponent_name",
-                    "kalshi_probability",
-                    "our_probability",
-                    "edge",
-                    "ev_per_contract",
-                    "roi",
-                    "ticker",
-                    "profile_source",
-                ]
+        display = visible.copy()
+        display["coverage"] = display.support_reasons.map(
+            lambda r: "; ".join(r) if r else "Meets data-quality requirements"
+        )
+        display = display[
+            [
+                "fighter_name",
+                "opponent_name",
+                "our_probability",
+                "kalshi_probability",
+                "market_midpoint",
+                "spread",
+                "quote_age_seconds",
+                "edge",
+                "ev_per_contract",
+                "coverage",
+                "ticker",
             ]
-            styled = display.style.format(
-                {
-                    "kalshi_probability": "{:.1%}",
-                    "our_probability": "{:.1%}",
-                    "edge": "{:+.1%}",
-                    "ev_per_contract": "${:+.3f}",
-                    "roi": "{:+.1%}",
-                }
-            ).apply(
-                lambda row: [
-                    "background-color: #173820; color: #c5f4ad" if row.edge >= minimum / 100 else ""
-                    for _ in row
-                ],
-                axis=1,
-            )
-            st.dataframe(styled, use_container_width=True, hide_index=True)
-            ticker = st.selectbox(
-                "Contract to log",
-                ready.ticker.tolist(),
-                format_func=lambda t: ready.set_index("ticker").loc[t, "fighter_name"],
-            )
-            log_trade_form(
-                db, ready.set_index("ticker", drop=False).loc[ticker].to_dict(), key_prefix="all"
-            )
-    skipped = analyzed[analyzed.our_probability.isna()]
-    if not skipped.empty:
-        with st.expander(f"Unavailable predictions ({len(skipped)})"):
-            st.dataframe(
-                skipped[["fighter_name", "opponent_name", "analysis_status"]],
-                hide_index=True,
-                use_container_width=True,
-            )
-    render_model_details(model)
+        ]
+        display.columns = [
+            "Fighter",
+            "Opponent",
+            "Our probability",
+            "Kalshi YES ask",
+            "Market midpoint",
+            "Spread",
+            "Quote age (sec)",
+            "Edge",
+            "EV / contract",
+            "Coverage",
+            "Ticker",
+        ]
+        styled = display.style.format(
+            {
+                c: "{:.1%}"
+                for c in ["Our probability", "Kalshi YES ask", "Market midpoint", "Spread", "Edge"]
+            },
+            na_rep="Unavailable",
+        ).format({"EV / contract": "${:+.3f}", "Quote age (sec)": "{:.0f}"}, na_rep="Unavailable")
+        styled = styled.apply(
+            lambda row: [
+                "background-color: #173820; color: #c5f4ad" if row.name in supported.index else ""
+                for _ in row
+            ],
+            axis=1,
+        )
+        st.dataframe(styled, use_container_width=True, hide_index=True)
+        for row in visible.to_dict("records"):
+            if str(row["ticker"]).startswith("espn:") or pd.isna(row["kalshi_probability"]):
+                continue
+            with st.expander(f"Log manual trade · {row['fighter_name']} · {row['ticker']}"):
+                if not row["supported"]:
+                    st.caption("Coverage: " + "; ".join(row["support_reasons"]))
+                log_trade_form(db, row, key_prefix="all")
+    render_context(collector, bouts, status, news)
+    if model is not None:
+        render_model_details(model)
 
 
 def render_tracker(db: Database) -> None:

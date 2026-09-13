@@ -170,3 +170,39 @@ def test_eight_year_window_includes_calibration_period():
     end = pd.Timestamp(frame.date.max()) + pd.Timedelta(days=1)
     assert pd.Timestamp(base.date.min()) >= end - pd.DateOffset(years=8)
     assert base.date.max() < calibration.date.min()
+
+
+def test_failed_promotion_preserves_model_and_publishes_report(db, tmp_path, monkeypatch):
+    import json
+
+    import model_experiments as experiments
+
+    frame = rich_frame()
+    frame["date"] = pd.date_range("2000-01-01", periods=len(frame), freq="3D").strftime("%Y-%m-%d")
+    frame["fight_id"] = [str(i) for i in range(len(frame))]
+    frame["event_id"] = frame.date
+    frame["a_stats_bouts"] = frame["b_stats_bouts"] = 5
+
+    class Store:
+        def __init__(self, db):
+            pass
+
+        def training_frame(self):
+            return frame
+
+    class EqualModel:
+        def predict_proba(self, inputs):
+            return np.full((len(inputs), 2), 0.5)
+
+    monkeypatch.setattr(experiments, "HistoricalFeatureStore", Store)
+    monkeypatch.setattr(experiments, "fit_recent", lambda *args, **kwargs: (EqualModel(), {}))
+    monkeypatch.setattr(
+        experiments, "fit_calibrated_model", lambda *args, **kwargs: (EqualModel(), {})
+    )
+    path = tmp_path / "existing.pkl"
+    path.write_bytes(b"keep the active model")
+    report = tmp_path / "comparison.json"
+    result = experiments.run_experiments(db.path, path, report)
+    assert not result["promotion"]["qualified"] and not result["promotion"]["promoted"]
+    assert path.read_bytes() == b"keep the active model"
+    assert json.loads(report.read_text())["locked_period"]["candidate"]["brier_score"] == 0.25
