@@ -153,3 +153,17 @@ def test_cleaning_does_not_invent_observations():
         parse_round(
             {"SIG.STR.": "10 of 20", "HEAD": "10 of 20", "BODY": "1 of 2", "LEG": "0 of 0"}, 300
         )
+
+
+def test_changed_round_source_is_reported_without_overwrite(db, tmp_path):
+    folder, manifest = archive_fixture(tmp_path)
+    reconcile(folder, manifest, db)
+    path = folder / "ufc_fight_stats.csv"
+    frame = pd.read_csv(path, keep_default_na=False)
+    frame.loc[0, "KD"] = 2
+    frame.to_csv(path, index=False)
+    report = reconcile(folder, manifest, db)
+    assert report["issue_counts"]["stored_source_conflict"] == 1
+    with db.connection() as con:
+        assert con.execute("SELECT MAX(kd) FROM round_statistics").fetchone()[0] == 0
+        assert con.execute("SELECT COUNT(*) FROM data_imports").fetchone()[0] == 2

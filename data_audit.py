@@ -22,7 +22,7 @@ from settings import CACHE_DIR, DB_PATH, ROOT, configure_logging
 from ufc_scraper import entity_id, parse_number
 
 log = logging.getLogger("ufc.audit")
-AUDIT_VERSION = 2
+AUDIT_VERSION = 3
 
 
 def load_table(path: str | Path) -> pd.DataFrame:
@@ -500,6 +500,37 @@ def reconcile(
     with db.connection() as con:
         con.execute("BEGIN IMMEDIATE")
         from database import PROFILE_FIELDS
+
+        # Retain previously accepted values and explicitly report new source disagreements.
+        for table, incoming, key_count in (
+            ("fighter_biometrics", [(fid, *v) for fid, v in heights.items()], 1),
+            ("fight_context", context_rows, 1),
+            ("round_statistics", round_rows, 3),
+        ):
+            columns = [r[1] for r in con.execute(f"PRAGMA table_info({table})")]
+            for values in incoming:
+                payload = dict(zip(columns, values, strict=True))
+                keys = columns[:key_count]
+                prior = con.execute(
+                    f"SELECT * FROM {table} WHERE " + " AND ".join(f"{k}=?" for k in keys),
+                    values[:key_count],
+                ).fetchone()
+                if prior:
+                    changed = {
+                        k: {"retained": prior[k], "incoming": value}
+                        for k, value in payload.items()
+                        if k not in {"source", "observed_at"} and prior[k] != value
+                    }
+                    if changed:
+                        issue(
+                            "stored_source_conflict",
+                            ":".join(str(payload[k]) for k in keys),
+                            f"{table}: retained accepted values; "
+                            + json.dumps(changed, default=int),
+                        )
+        report["issue_counts"] = dict(
+            pd.Series([x["kind"] for x in issues], dtype=str).value_counts().items()
+        )
 
         for p in new_profiles.values():
             p = {**p, "name_key": normalize_name(p["name"])}

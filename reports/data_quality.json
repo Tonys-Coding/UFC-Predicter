@@ -1,7 +1,7 @@
 {
-  "audit_version": 2,
-  "fingerprint": "f86c4da6d41d900dc8ecab56962bbce6b553e820f25a30f56dd5087dc11b4447",
-  "completed_at": "2026-09-13T08:32:13.565250+00:00",
+  "audit_version": 3,
+  "fingerprint": "23fd5ceca82b4db916bd216ebdd2a984343ba1070148d7a872919fc878d8b849",
+  "completed_at": "2026-09-13T09:01:58.949289+00:00",
   "source_hashes": {
     "ufc_event_details.csv": "1920491da47a20a7186e1ac91fea1a1fcd3281c0627b560fa70aac5e58b685dc",
     "ufc_fight_results.csv": "ecce6eba834181101a565205221647ab2ac19c71f4290cc0962cf444ed19c983",
@@ -24,7 +24,7 @@
   "new_fight_ids": [],
   "accepted_round_rows": 41382,
   "core_rows": 17574,
-  "profiles_added_or_filled": 23,
+  "profiles_added_or_filled": 0,
   "duration_corrections": 27,
   "corrections": [
     {
