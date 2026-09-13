@@ -9,6 +9,7 @@ import numpy as np
 import sklearn
 from sklearn.calibration import CalibratedClassifierCV
 
+from advanced_features import ADVANCED_VERSION, HistoricalFeatureStore
 from database import Database
 from features import FEATURE_COLUMNS, FEATURE_VERSION, matchup_raw_inputs
 from historical_features import compute_pre_fight_metrics
@@ -24,9 +25,9 @@ def load_model(path: str | Path = MODEL_PATH):
         )
     model = joblib.load(path)
     metadata = getattr(model, "ufc_metadata_", {})
-    if (
-        metadata.get("feature_version") != FEATURE_VERSION
-        or metadata.get("feature_columns") != FEATURE_COLUMNS
+    version = metadata.get("feature_version")
+    if version not in {FEATURE_VERSION, ADVANCED_VERSION} or (
+        version == FEATURE_VERSION and metadata.get("feature_columns") != FEATURE_COLUMNS
     ):
         raise ValueError("Model feature schema is incompatible. Retrain with this project version.")
     if metadata.get("sklearn_version") != sklearn.__version__:
@@ -45,7 +46,14 @@ def load_model(path: str | Path = MODEL_PATH):
 
 
 def predict_matchup(
-    model, fighter: dict, opponent: dict, on_date: str, *, db: Database | None = None
+    model,
+    fighter: dict,
+    opponent: dict,
+    on_date: str,
+    *,
+    db: Database | None = None,
+    context: dict | None = None,
+    store: HistoricalFeatureStore | None = None,
 ) -> float:
     if fighter["fighter_id"] == opponent["fighter_id"]:
         raise ValueError("A fighter cannot be matched against themselves.")
@@ -53,6 +61,15 @@ def predict_matchup(
     # one prediction, so their model probabilities sum to one despite asymmetric td_diff.
     a, b = sorted((fighter, opponent), key=lambda item: item["fighter_id"])
     db = db or Database()
+    if model.ufc_metadata_.get("feature_version") == ADVANCED_VERSION:
+        store = store or HistoricalFeatureStore(db)
+        inputs, coverage = store.at(a["fighter_id"], b["fighter_id"], on_date, context)
+        if min(coverage["a_stats_bouts"], coverage["b_stats_bouts"]) < 2:
+            raise ValueError("Both fighters need two complete earlier recorded bouts")
+        probability = float(model.predict_proba(inputs)[0, 1])
+        if not np.isfinite(probability) or not 0 <= probability <= 1:
+            raise ValueError("Model produced an invalid probability")
+        return probability if fighter["fighter_id"] == a["fighter_id"] else 1 - probability
     enriched = []
     for profile in (a, b):
         metrics = compute_pre_fight_metrics(profile["fighter_id"], on_date, db=db)

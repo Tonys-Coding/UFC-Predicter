@@ -415,7 +415,7 @@ class UFCScraper:
         }
 
 
-def get_training_dataframe(db_path: str | Path = DB_PATH, *, impute: bool = True) -> pd.DataFrame:
+def get_training_dataframe(db_path: str | Path = DB_PATH, *, impute: bool = False) -> pd.DataFrame:
     """Export eight differentials and their raw A/B inputs using strictly earlier bouts.
 
     Training passes impute=False. Each nested calibration estimator then learns its own
@@ -427,6 +427,13 @@ def get_training_dataframe(db_path: str | Path = DB_PATH, *, impute: bool = True
     return asof_training_dataframe(Database(db_path), impute=impute)
 
 
+def get_rich_training_dataframe(db_path: str | Path = DB_PATH) -> pd.DataFrame:
+    """Export prior-only rich raw inputs; fitted pipelines own every imputation decision."""
+    from advanced_features import HistoricalFeatureStore
+
+    return HistoricalFeatureStore(Database(db_path)).training_frame()
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -434,6 +441,11 @@ def main() -> int:
     )
     parser.add_argument("--force", action="store_true", help="Bypass caches")
     parser.add_argument("--export", type=Path, help="Export joined training data after updating")
+    parser.add_argument(
+        "--rich",
+        action="store_true",
+        help="Export richer prior-only inputs instead of the eight-feature benchmark",
+    )
     parser.add_argument("--fighter-url", help="Refresh one fighter instead of event history")
     args = parser.parse_args()
     configure_logging()
@@ -447,7 +459,10 @@ def main() -> int:
         log.info("Update result: %s", json.dumps(result, default=str))
         if args.export:
             args.export.parent.mkdir(parents=True, exist_ok=True)
-            get_training_dataframe().to_csv(args.export, index=False)
+            frame = (
+                get_rich_training_dataframe() if args.rich else get_training_dataframe(impute=False)
+            )
+            frame.to_csv(args.export, index=False)
         return 2 if result.get("failed_urls") else 0
     except (ScrapeError, ValueError):
         log.exception("UFCStats update failed; existing local records are preserved")

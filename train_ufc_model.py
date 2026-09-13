@@ -313,10 +313,22 @@ def main() -> int:
     parser.add_argument("--calibration", choices=["sigmoid", "isotonic"], default="sigmoid")
     parser.add_argument("--db", type=Path, default=DB_PATH)
     parser.add_argument("--output", type=Path, default=MODEL_PATH)
+    parser.add_argument(
+        "--legacy",
+        action="store_true",
+        help="Explicitly train the eight-feature benchmark instead of running the promotion gate",
+    )
     args = parser.parse_args()
     configure_logging()
     try:
-        train_model(args.db, args.output, args.algorithm, args.calibration)
+        if args.legacy:
+            if args.output == MODEL_PATH:
+                raise ValueError("Use --output with a separate benchmark artifact for --legacy")
+            train_model(args.db, args.output, args.algorithm, args.calibration)
+        else:
+            from model_experiments import run_experiments
+
+            run_experiments(args.db, args.output)
         return 0
     except Exception:
         log.exception("Model training failed; no replacement model was published")

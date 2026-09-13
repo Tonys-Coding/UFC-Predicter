@@ -1,6 +1,12 @@
 {
-  "artifact_version": 2,
-  "feature_version": "pre-fight-eight-v2",
+  "artifact_version": 3,
+  "feature_version": "pre-fight-rich-v3",
+  "feature_groups": [
+    "opponent",
+    "damage",
+    "grappling",
+    "context"
+  ],
   "feature_columns": [
     "reach_diff",
     "strike_diff",
@@ -9,7 +15,111 @@
     "win_streak_diff",
     "finish_rate_diff",
     "strike_diff_moving",
-    "td_def_diff_moving"
+    "td_def_diff_moving",
+    "a_reach_missing",
+    "b_reach_missing",
+    "a_age_missing",
+    "b_age_missing",
+    "a_slpm_missing",
+    "b_slpm_missing",
+    "a_sapm_missing",
+    "b_sapm_missing",
+    "a_td_acc_missing",
+    "b_td_acc_missing",
+    "a_td_def_missing",
+    "b_td_def_missing",
+    "a_win_streak_missing",
+    "b_win_streak_missing",
+    "a_finish_rate_missing",
+    "b_finish_rate_missing",
+    "a_sig_strike_differential_moving_missing",
+    "b_sig_strike_differential_moving_missing",
+    "a_takedown_defense_moving_missing",
+    "b_takedown_defense_moving_missing",
+    "a_elo_missing",
+    "b_elo_missing",
+    "elo_diff",
+    "a_mean_opponent_elo_missing",
+    "b_mean_opponent_elo_missing",
+    "mean_opponent_elo_diff",
+    "a_kd_per_min_career_missing",
+    "b_kd_per_min_career_missing",
+    "kd_per_min_career_diff",
+    "a_kd_per_min_recent_missing",
+    "b_kd_per_min_recent_missing",
+    "kd_per_min_recent_diff",
+    "a_kd_absorbed_per_min_career_missing",
+    "b_kd_absorbed_per_min_career_missing",
+    "kd_absorbed_per_min_career_diff",
+    "a_kd_absorbed_per_min_recent_missing",
+    "b_kd_absorbed_per_min_recent_missing",
+    "kd_absorbed_per_min_recent_diff",
+    "a_head_per_min_career_missing",
+    "b_head_per_min_career_missing",
+    "head_per_min_career_diff",
+    "a_head_per_min_recent_missing",
+    "b_head_per_min_recent_missing",
+    "head_per_min_recent_diff",
+    "a_head_absorbed_per_min_career_missing",
+    "b_head_absorbed_per_min_career_missing",
+    "head_absorbed_per_min_career_diff",
+    "a_head_absorbed_per_min_recent_missing",
+    "b_head_absorbed_per_min_recent_missing",
+    "head_absorbed_per_min_recent_diff",
+    "a_control_share_career_missing",
+    "b_control_share_career_missing",
+    "control_share_career_diff",
+    "a_control_share_recent_missing",
+    "b_control_share_recent_missing",
+    "control_share_recent_diff",
+    "a_sub_per_15_career_missing",
+    "b_sub_per_15_career_missing",
+    "sub_per_15_career_diff",
+    "a_sub_per_15_recent_missing",
+    "b_sub_per_15_recent_missing",
+    "sub_per_15_recent_diff",
+    "a_td_success_career_missing",
+    "b_td_success_career_missing",
+    "td_success_career_diff",
+    "a_td_success_recent_missing",
+    "b_td_success_recent_missing",
+    "td_success_recent_diff",
+    "a_td_defense_career_missing",
+    "b_td_defense_career_missing",
+    "td_defense_career_diff",
+    "a_td_defense_recent_missing",
+    "b_td_defense_recent_missing",
+    "td_defense_recent_diff",
+    "a_days_since_fight_missing",
+    "b_days_since_fight_missing",
+    "days_since_fight_diff",
+    "a_bouts_last_year_missing",
+    "b_bouts_last_year_missing",
+    "bouts_last_year_diff",
+    "a_height_missing",
+    "b_height_missing",
+    "height_diff",
+    "a_stance_Orthodox",
+    "a_stance_Southpaw",
+    "a_stance_Switch",
+    "b_stance_Orthodox",
+    "b_stance_Southpaw",
+    "b_stance_Switch",
+    "weight_class_bantamweight",
+    "weight_class_catch weight",
+    "weight_class_featherweight",
+    "weight_class_flyweight",
+    "weight_class_heavyweight",
+    "weight_class_light heavyweight",
+    "weight_class_lightweight",
+    "weight_class_middleweight",
+    "weight_class_welterweight",
+    "weight_class_women's bantamweight",
+    "weight_class_women's featherweight",
+    "weight_class_women's flyweight",
+    "weight_class_women's strawweight",
+    "scheduled_rounds",
+    "scheduled_rounds_missing"
   ],
   "raw_input_columns": [
     "a_reach",
@@ -31,480 +141,217 @@
     "b_win_streak",
     "b_finish_rate",
     "b_sig_strike_differential_moving",
-    "b_takedown_defense_moving"
+    "b_takedown_defense_moving",
+    "a_elo",
+    "a_mean_opponent_elo",
+    "a_kd_per_min_career",
+    "a_kd_per_min_recent",
+    "a_kd_absorbed_per_min_career",
+    "a_kd_absorbed_per_min_recent",
+    "a_head_per_min_career",
+    "a_head_per_min_recent",
+    "a_head_absorbed_per_min_career",
+    "a_head_absorbed_per_min_recent",
+    "a_control_share_career",
+    "a_control_share_recent",
+    "a_sub_per_15_career",
+    "a_sub_per_15_recent",
+    "a_td_success_career",
+    "a_td_success_recent",
+    "a_td_defense_career",
+    "a_td_defense_recent",
+    "a_distance_share_career",
+    "a_distance_share_recent",
+    "a_clinch_share_career",
+    "a_clinch_share_recent",
+    "a_ground_share_career",
+    "a_ground_share_recent",
+    "a_head_share_career",
+    "a_head_share_recent",
+    "a_body_share_career",
+    "a_body_share_recent",
+    "a_leg_share_career",
+    "a_leg_share_recent",
+    "a_days_since_fight",
+    "a_bouts_last_year",
+    "a_height",
+    "b_elo",
+    "b_mean_opponent_elo",
+    "b_kd_per_min_career",
+    "b_kd_per_min_recent",
+    "b_kd_absorbed_per_min_career",
+    "b_kd_absorbed_per_min_recent",
+    "b_head_per_min_career",
+    "b_head_per_min_recent",
+    "b_head_absorbed_per_min_career",
+    "b_head_absorbed_per_min_recent",
+    "b_control_share_career",
+    "b_control_share_recent",
+    "b_sub_per_15_career",
+    "b_sub_per_15_recent",
+    "b_td_success_career",
+    "b_td_success_recent",
+    "b_td_defense_career",
+    "b_td_defense_recent",
+    "b_distance_share_career",
+    "b_distance_share_recent",
+    "b_clinch_share_career",
+    "b_clinch_share_recent",
+    "b_ground_share_career",
+    "b_ground_share_recent",
+    "b_head_share_career",
+    "b_head_share_recent",
+    "b_body_share_career",
+    "b_body_share_recent",
+    "b_leg_share_career",
+    "b_leg_share_recent",
+    "b_days_since_fight",
+    "b_bouts_last_year",
+    "b_height",
+    "a_stance",
+    "b_stance",
+    "weight_class",
+    "scheduled_rounds"
   ],
-  "trained_at": "2026-09-12T23:46:12.181163+00:00",
-  "algorithm": "random-forest",
+  "trained_at": "2026-09-13T09:06:40.575428+00:00",
   "sklearn_version": "1.6.1",
-  "training_rows": 4911,
-  "class_counts": {
-    "1": 2474,
-    "0": 2437
-  },
-  "first_fight": "1995-07-14",
+  "algorithm": "random-forest",
+  "history_years": 8,
+  "training_rows": 2565,
+  "first_fight": "2018-09-08",
   "last_fight": "2026-09-05",
-  "provenance": "pre-fight career and last-three-bout metrics; strictly earlier event dates; static reach and DOB",
+  "provenance": "Audited round-level UFCStats; strictly earlier dates",
   "retrospective": false,
-  "validation_strategy": "five expanding windows grouped by event date; nested temporal calibration",
   "calibration_method": "sigmoid",
-  "calibration_ensemble": true,
+  "calibration_ensemble": false,
   "final_calibration_splits": [
     {
-      "train_rows": 793,
-      "test_rows": 1232,
-      "train_first_date": "1995-07-14",
-      "train_last_date": "2012-06-01",
-      "test_first_date": "2012-06-08",
-      "test_last_date": "2017-07-08"
-    },
-    {
-      "train_rows": 2025,
-      "test_rows": 1364,
-      "train_first_date": "1995-07-14",
-      "train_last_date": "2017-07-08",
-      "test_first_date": "2017-07-16",
-      "test_last_date": "2022-03-05"
-    },
-    {
-      "train_rows": 3389,
-      "test_rows": 1522,
-      "train_first_date": "1995-07-14",
-      "train_last_date": "2022-03-05",
-      "test_first_date": "2022-03-12",
-      "test_last_date": "2026-09-05"
-    }
-  ],
-  "imputation": {
-    "scope": "raw-metric medians learned separately inside each base-estimator training split",
-    "final_estimator_medians": [
-      {
-        "reach": 74.0,
-        "age": 29.737776956405675,
-        "slpm": 2.5846932688925257,
-        "sapm": 2.0392636040164414,
-        "td_acc": 0.5,
-        "td_def": 0.5865817091454273,
-        "win_streak": 1.0,
-        "finish_rate": 0.6666666666666666,
-        "sig_strike_differential_moving": 0.5912071522173943,
-        "takedown_defense_moving": 0.6
-      },
-      {
-        "reach": 73.0,
-        "age": 30.38939882406894,
-        "slpm": 2.962871059645253,
-        "sapm": 2.4430508123638814,
-        "td_acc": 0.44594594594594594,
-        "td_def": 0.6363636363636364,
-        "win_streak": 1.0,
-        "finish_rate": 0.6,
-        "sig_strike_differential_moving": 0.5340501792114696,
-        "takedown_defense_moving": 0.6666666666666667
-      },
-      {
-        "reach": 73.0,
-        "age": 30.815143363655654,
-        "slpm": 3.2566250732275526,
-        "sapm": 2.745550611205421,
-        "td_acc": 0.42105263157894735,
-        "td_def": 0.6470588235294117,
-        "win_streak": 1.0,
-        "finish_rate": 0.5555555555555556,
-        "sig_strike_differential_moving": 0.507618558466016,
-        "takedown_defense_moving": 0.6666666666666667
-      }
-    ]
-  },
-  "folds": [
-    {
-      "fold": 1,
-      "accuracy": 0.5409604519774012,
-      "precision": 0.5379188712522046,
-      "brier_score": 0.24589967328876777,
-      "log_loss": 0.6848841052288134,
-      "baseline_brier": 0.24970187476785327,
-      "baseline_log_loss": 0.6925512414702374,
-      "train_rows": 442,
-      "test_rows": 708,
-      "train_first_date": "1995-07-14",
-      "train_last_date": "2009-12-12",
-      "test_first_date": "2010-01-02",
-      "test_last_date": "2014-04-26",
-      "calibration_splits": [
-        {
-          "train_rows": 61,
-          "test_rows": 96,
-          "train_first_date": "1995-07-14",
-          "train_last_date": "2002-09-27",
-          "test_first_date": "2002-11-22",
-          "test_last_date": "2006-10-10"
-        },
-        {
-          "train_rows": 157,
-          "test_rows": 125,
-          "train_first_date": "1995-07-14",
-          "train_last_date": "2006-10-10",
-          "test_first_date": "2006-10-14",
-          "test_last_date": "2008-06-07"
-        },
-        {
-          "train_rows": 282,
-          "test_rows": 160,
-          "train_first_date": "1995-07-14",
-          "train_last_date": "2008-06-07",
-          "test_first_date": "2008-06-21",
-          "test_last_date": "2009-12-12"
-        }
-      ],
-      "uncalibrated": {
-        "accuracy": 0.53954802259887,
-        "precision": 0.5402298850574713,
-        "brier_score": 0.2472129816406764,
-        "log_loss": 0.6873295030752686,
-        "baseline_brier": 0.24970187476785327,
-        "baseline_log_loss": 0.6925512414702374
-      }
-    },
-    {
-      "fold": 2,
-      "accuracy": 0.5714285714285714,
-      "precision": 0.5481099656357389,
-      "brier_score": 0.2443009000043718,
-      "log_loss": 0.6816386544378912,
-      "baseline_brier": 0.2509000486092357,
-      "baseline_log_loss": 0.694949008405272,
-      "train_rows": 1150,
-      "test_rows": 875,
-      "train_first_date": "1995-07-14",
-      "train_last_date": "2014-04-26",
-      "test_first_date": "2014-05-10",
-      "test_last_date": "2017-07-08",
-      "calibration_splits": [
-        {
-          "train_rows": 157,
-          "test_rows": 285,
-          "train_first_date": "1995-07-14",
-          "train_last_date": "2006-10-10",
-          "test_first_date": "2006-10-14",
-          "test_last_date": "2009-12-12"
-        },
-        {
-          "train_rows": 442,
-          "test_rows": 351,
-          "train_first_date": "1995-07-14",
-          "train_last_date": "2009-12-12",
-          "test_first_date": "2010-01-02",
-          "test_last_date": "2012-06-01"
-        },
-        {
-          "train_rows": 793,
-          "test_rows": 357,
-          "train_first_date": "1995-07-14",
-          "train_last_date": "2012-06-01",
-          "test_first_date": "2012-06-08",
-          "test_last_date": "2014-04-26"
-        }
-      ],
-      "uncalibrated": {
-        "accuracy": 0.5691428571428572,
-        "precision": 0.5475352112676056,
-        "brier_score": 0.24551506927641348,
-        "log_loss": 0.684307366149314,
-        "baseline_brier": 0.2509000486092357,
-        "baseline_log_loss": 0.694949008405272
-      }
-    },
-    {
-      "fold": 3,
-      "accuracy": 0.5822222222222222,
-      "precision": 0.5719626168224299,
-      "brier_score": 0.23968630658190118,
-      "log_loss": 0.6722733554089622,
-      "baseline_brier": 0.2500349946654474,
-      "baseline_log_loss": 0.6932171934656013,
-      "train_rows": 2025,
-      "test_rows": 900,
-      "train_first_date": "1995-07-14",
-      "train_last_date": "2017-07-08",
-      "test_first_date": "2017-07-16",
-      "test_last_date": "2020-09-12",
-      "calibration_splits": [
-        {
-          "train_rows": 282,
-          "test_rows": 511,
-          "train_first_date": "1995-07-14",
-          "train_last_date": "2008-06-07",
-          "test_first_date": "2008-06-21",
-          "test_last_date": "2012-06-01"
-        },
-        {
-          "train_rows": 793,
-          "test_rows": 541,
-          "train_first_date": "1995-07-14",
-          "train_last_date": "2012-06-01",
-          "test_first_date": "2012-06-08",
-          "test_last_date": "2015-01-31"
-        },
-        {
-          "train_rows": 1334,
-          "test_rows": 691,
-          "train_first_date": "1995-07-14",
-          "train_last_date": "2015-01-31",
-          "test_first_date": "2015-02-14",
-          "test_last_date": "2017-07-08"
-        }
-      ],
-      "uncalibrated": {
-        "accuracy": 0.5777777777777777,
-        "precision": 0.5630397236614854,
-        "brier_score": 0.240468843431049,
-        "log_loss": 0.6740653108627889,
-        "baseline_brier": 0.2500349946654474,
-        "baseline_log_loss": 0.6932171934656013
-      }
-    },
-    {
-      "fold": 4,
-      "accuracy": 0.5764462809917356,
-      "precision": 0.569811320754717,
-      "brier_score": 0.2400618324721974,
-      "log_loss": 0.6729617277135038,
-      "baseline_brier": 0.2500645481773687,
-      "baseline_log_loss": 0.6932762935834207,
-      "train_rows": 2925,
-      "test_rows": 968,
-      "train_first_date": "1995-07-14",
-      "train_last_date": "2020-09-12",
-      "test_first_date": "2020-09-19",
-      "test_last_date": "2023-08-19",
-      "calibration_splits": [
-        {
-          "train_rows": 442,
-          "test_rows": 708,
-          "train_first_date": "1995-07-14",
-          "train_last_date": "2009-12-12",
-          "test_first_date": "2010-01-02",
-          "test_last_date": "2014-04-26"
-        },
-        {
-          "train_rows": 1150,
-          "test_rows": 875,
-          "train_first_date": "1995-07-14",
-          "train_last_date": "2014-04-26",
-          "test_first_date": "2014-05-10",
-          "test_last_date": "2017-07-08"
-        },
-        {
-          "train_rows": 2025,
-          "test_rows": 900,
-          "train_first_date": "1995-07-14",
-          "train_last_date": "2017-07-08",
-          "test_first_date": "2017-07-16",
-          "test_last_date": "2020-09-12"
-        }
-      ],
-      "uncalibrated": {
-        "accuracy": 0.5857438016528925,
-        "precision": 0.5704584040747029,
-        "brier_score": 0.24161245860283073,
-        "log_loss": 0.6761264697645492,
-        "baseline_brier": 0.2500645481773687,
-        "baseline_log_loss": 0.6932762935834207
-      }
-    },
-    {
-      "fold": 5,
-      "accuracy": 0.6218074656188605,
-      "precision": 0.609981515711645,
-      "brier_score": 0.2340764530072427,
-      "log_loss": 0.6607913610443317,
-      "baseline_brier": 0.2500957364431714,
-      "baseline_log_loss": 0.6933386645204971,
-      "train_rows": 3893,
-      "test_rows": 1018,
-      "train_first_date": "1995-07-14",
-      "train_last_date": "2023-08-19",
-      "test_first_date": "2023-08-26",
-      "test_last_date": "2026-09-05",
-      "calibration_splits": [
-        {
-          "train_rows": 629,
-          "test_rows": 925,
-          "train_first_date": "1995-07-14",
-          "train_last_date": "2011-04-30",
-          "test_first_date": "2011-05-28",
-          "test_last_date": "2015-11-21"
-        },
-        {
-          "train_rows": 1554,
-          "test_rows": 1159,
-          "train_first_date": "1995-07-14",
-          "train_last_date": "2015-11-21",
-          "test_first_date": "2015-11-28",
-          "test_last_date": "2019-11-02"
-        },
-        {
-          "train_rows": 2713,
-          "test_rows": 1180,
-          "train_first_date": "1995-07-14",
-          "train_last_date": "2019-11-02",
-          "test_first_date": "2019-11-09",
-          "test_last_date": "2023-08-19"
-        }
-      ],
-      "uncalibrated": {
-        "accuracy": 0.6159135559921415,
-        "precision": 0.5972461273666093,
-        "brier_score": 0.23383151654215456,
-        "log_loss": 0.6602009896141291,
-        "baseline_brier": 0.2500957364431714,
-        "baseline_log_loss": 0.6933386645204971
-      }
+      "months": 12,
+      "train_rows": 2225,
+      "calibration_rows": 340,
+      "train_first_date": "2018-09-08",
+      "train_last_date": "2025-08-23",
+      "calibration_first_date": "2025-09-06",
+      "calibration_last_date": "2026-09-05"
     }
   ],
   "mean_metrics": {
-    "accuracy": 0.5785729984477581,
-    "precision": 0.5675568580353471,
-    "brier_score": 0.24080503307089618,
-    "log_loss": 0.6745098407667005,
-    "baseline_brier": 0.2501594405326153,
-    "baseline_log_loss": 0.6934664802890056
+    "accuracy": 0.61585673615881,
+    "precision": 0.6224430610197579,
+    "brier_score": 0.22987982244490363,
+    "log_loss": 0.6516205341485346
   },
-  "pooled_oos_metrics": {
-    "accuracy": 0.5813381069590512,
-    "precision": 0.5669691470054447,
-    "brier_score": 0.2403776270106163,
-    "log_loss": 0.6736384754918375,
-    "baseline_brier": 0.25017182980587727,
-    "baseline_log_loss": 0.693491239226941
+  "oos_rows": 1659,
+  "chronological_holdout": {
+    "accuracy": 0.6352941176470588,
+    "precision": 0.6153846153846154,
+    "brier_score": 0.2211166130543839,
+    "log_loss": 0.6320257034688608,
+    "baseline_brier": 0.25013969058507024,
+    "baseline_log_loss": 0.693426571492893,
+    "cutoff": "2025-09-06"
   },
-  "oos_rows": 4469,
-  "warmup_rows": 442,
   "reliability": {
     "bins": [
       {
+        "lower": 0.1,
+        "upper": 0.2,
+        "count": 11,
+        "mean_predicted": 0.1766693451900921,
+        "observed_win_rate": 0.18181818181818182
+      },
+      {
         "lower": 0.2,
         "upper": 0.30000000000000004,
-        "count": 1,
-        "mean_predicted": 0.2899139518970957,
-        "observed_win_rate": 1.0
+        "count": 35,
+        "mean_predicted": 0.25458377302758434,
+        "observed_win_rate": 0.14285714285714285
       },
       {
         "lower": 0.30000000000000004,
         "upper": 0.4,
-        "count": 313,
-        "mean_predicted": 0.37342235322973666,
-        "observed_win_rate": 0.30990415335463256
+        "count": 52,
+        "mean_predicted": 0.34941626022262895,
+        "observed_win_rate": 0.36538461538461536
       },
       {
         "lower": 0.4,
         "upper": 0.5,
-        "count": 1400,
-        "mean_predicted": 0.45667809313626645,
-        "observed_win_rate": 0.4142857142857143
+        "count": 60,
+        "mean_predicted": 0.4487596913295269,
+        "observed_win_rate": 0.4666666666666667
       },
       {
         "lower": 0.5,
         "upper": 0.6000000000000001,
-        "count": 2129,
-        "mean_predicted": 0.5457962863594816,
-        "observed_win_rate": 0.5392202912165336
+        "count": 73,
+        "mean_predicted": 0.5531466725853663,
+        "observed_win_rate": 0.5342465753424658
       },
       {
         "lower": 0.6000000000000001,
         "upper": 0.7000000000000001,
-        "count": 623,
-        "mean_predicted": 0.6308162742236502,
-        "observed_win_rate": 0.6613162118780096
+        "count": 72,
+        "mean_predicted": 0.6480821644486576,
+        "observed_win_rate": 0.6388888888888888
       },
       {
         "lower": 0.7000000000000001,
         "upper": 0.8,
-        "count": 3,
-        "mean_predicted": 0.7091157001515631,
-        "observed_win_rate": 0.6666666666666666
+        "count": 36,
+        "mean_predicted": 0.7333893378215735,
+        "observed_win_rate": 0.7222222222222222
+      },
+      {
+        "lower": 0.8,
+        "upper": 0.9,
+        "count": 1,
+        "mean_predicted": 0.8043983891346177,
+        "observed_win_rate": 1.0
       }
     ],
-    "expected_calibration_error": 0.025300898392982878,
+    "expected_calibration_error": 0.025032596938244812,
     "note": "Finite-sample calibration diagnostics; neither perfect calibration nor betting profitability is guaranteed."
   },
-  "chronological_holdout": {
-    "accuracy": 0.6133553173948887,
-    "precision": 0.5984848484848485,
-    "brier_score": 0.23461313783549434,
-    "log_loss": 0.6618508009787785,
-    "baseline_brier": 0.2501363759909625,
-    "baseline_log_loss": 0.6934199537797153,
-    "cutoff": "2023-02-11",
-    "train_rows": 3698,
-    "test_rows": 1213,
-    "calibration_splits": [
-      {
-        "train_rows": 603,
-        "test_rows": 854,
-        "train_first_date": "1995-07-14",
-        "train_last_date": "2011-02-05",
-        "test_first_date": "2011-02-26",
-        "test_last_date": "2015-07-15"
-      },
-      {
-        "train_rows": 1457,
-        "test_rows": 1124,
-        "train_first_date": "1995-07-14",
-        "train_last_date": "2015-07-15",
-        "test_first_date": "2015-07-18",
-        "test_last_date": "2019-06-08"
-      },
-      {
-        "train_rows": 2581,
-        "test_rows": 1117,
-        "train_first_date": "1995-07-14",
-        "train_last_date": "2019-06-08",
-        "test_first_date": "2019-06-22",
-        "test_last_date": "2023-02-04"
-      }
-    ],
-    "reliability": {
-      "bins": [
-        {
-          "lower": 0.30000000000000004,
-          "upper": 0.4,
-          "count": 146,
-          "mean_predicted": 0.3691860239217721,
-          "observed_win_rate": 0.3013698630136986
-        },
-        {
-          "lower": 0.4,
-          "upper": 0.5,
-          "count": 407,
-          "mean_predicted": 0.4496025785621141,
-          "observed_win_rate": 0.3931203931203931
-        },
-        {
-          "lower": 0.5,
-          "upper": 0.6000000000000001,
-          "count": 414,
-          "mean_predicted": 0.549684768193701,
-          "observed_win_rate": 0.538647342995169
-        },
-        {
-          "lower": 0.6000000000000001,
-          "upper": 0.7000000000000001,
-          "count": 243,
-          "mean_predicted": 0.6375649352852829,
-          "observed_win_rate": 0.6995884773662552
-        },
-        {
-          "lower": 0.7000000000000001,
-          "upper": 0.8,
-          "count": 3,
-          "mean_predicted": 0.7092761896746649,
-          "observed_win_rate": 0.6666666666666666
-        }
-      ],
-      "expected_calibration_error": 0.04341174962428004,
-      "note": "Finite-sample calibration diagnostics; neither perfect calibration nor betting profitability is guaranteed."
-    }
+  "dataset_sha256": "fc16464d76d30ae35bd9e5b2283787869a007191b52d12111d9195b3c23e1f0d",
+  "imputation": {
+    "medians": {
+      "elo": 1534.5522575623186,
+      "mean_opponent_elo": 1518.854372420707,
+      "kd_per_min_career": 0.020680486684384602,
+      "kd_per_min_recent": 0.0,
+      "kd_absorbed_per_min_career": 0.0094985572282904,
+      "kd_absorbed_per_min_recent": 0.0,
+      "head_per_min_career": 2.4739241863554318,
+      "head_per_min_recent": 2.472709217297102,
+      "head_absorbed_per_min_career": 2.1088893890393,
+      "head_absorbed_per_min_recent": 2.2,
+      "control_share_career": 0.17666044112190574,
+      "control_share_recent": 0.15568332941220175,
+      "sub_per_15_career": 0.3706246827729136,
+      "sub_per_15_recent": 0.0,
+      "td_success_career": 0.3960298742138365,
+      "td_success_recent": 0.3684210526315789,
+      "td_defense_career": 0.6666666666666667,
+      "td_defense_recent": 0.6666666666666667,
+      "days_since_fight": 182.0,
+      "bouts_last_year": 1.0,
+      "height": 70.0
+    },
+    "baseline_medians": {
+      "reach": 72.0,
+      "age": 31.958219539073355,
+      "slpm": 3.9473684210526314,
+      "sapm": 3.4381871073241177,
+      "td_acc": 0.38461538461538464,
+      "td_def": 0.6666666666666667,
+      "win_streak": 1.0,
+      "finish_rate": 0.5,
+      "sig_strike_differential_moving": 0.42557823129251693,
+      "takedown_defense_moving": 0.6666666666666667
+    },
+    "dropped_all_missing_fields": []
   },
-  "dataset_sha256": "a70578e266e48dcd20f66de59823fc420389bb7ad625d10aabb7abe0e41fb7cf"
+  "available_history_rows": 4921,
+  "model_version": "b9bab09cdff40cff208e"
 }

@@ -18,3 +18,4 @@ backups/
 *.csv
 *.ndjson
 .DS_Store
+*.training.lock

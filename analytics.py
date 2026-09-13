@@ -8,7 +8,9 @@ import re
 import numpy as np
 import pandas as pd
 
+from advanced_features import ADVANCED_VERSION, HistoricalFeatureStore
 from database import Database
+from historical_features import compute_pre_fight_metrics
 from modeling import predict_matchup
 from ufc_scraper import ScrapeError, UFCScraper
 
@@ -38,6 +40,11 @@ def evaluate_markets(markets: pd.DataFrame, model, db: Database | None = None) -
     db = db or Database()
     scraper = UFCScraper(db)
     profiles, errors = {}, {}
+    store = (
+        HistoricalFeatureStore(db)
+        if getattr(model, "ufc_metadata_", {}).get("feature_version") == ADVANCED_VERSION
+        else None
+    )
     output = []
     try:
         for row in markets.to_dict("records"):
@@ -49,8 +56,23 @@ def evaluate_markets(markets: pd.DataFrame, model, db: Database | None = None) -
                 "roi": np.nan,
                 "analysis_status": "Ready",
                 "profile_source": "",
+                "fighter_id": None,
+                "opponent_id": None,
+                "min_prior_complete_bouts": 0,
+                "recent_complete": False,
             }
             try:
+                # The event's nominal date can differ from the UTC start date for late cards.
+                match = re.match(r"^KX(?:UFC|MMA)FIGHT-(\d{2}[A-Z]{3}\d{2})", row["event_ticker"])
+                event_date = (
+                    pd.to_datetime(match[1], format="%y%b%d", errors="coerce") if match else pd.NaT
+                )
+                if row.get("calendar_verified") is True and pd.notna(row.get("model_event_date")):
+                    event_date = pd.to_datetime(row["model_event_date"], errors="coerce")
+                if pd.isna(event_date):
+                    raise ValueError(
+                        "Cannot verify the event's calendar date for historical features."
+                    )
                 for name in (row["fighter_name"], row["opponent_name"]):
                     if name in errors:
                         raise ScrapeError(errors[name])
@@ -61,20 +83,40 @@ def evaluate_markets(markets: pd.DataFrame, model, db: Database | None = None) -
                             errors[name] = str(exc)
                             raise
                 a, b = profiles[row["fighter_name"]], profiles[row["opponent_name"]]
-                # The event's nominal date can differ from the UTC start date for late cards.
-                match = re.match(r"^KX(?:UFC|MMA)FIGHT-(\d{2}[A-Z]{3}\d{2})", row["event_ticker"])
-                event_date = (
-                    pd.to_datetime(match[1], format="%y%b%d", errors="coerce") if match else pd.NaT
-                )
-                if pd.isna(event_date):
-                    raise ValueError(
-                        "Cannot verify the event's calendar date for historical features."
+                result.update(fighter_id=a["fighter_id"], opponent_id=b["fighter_id"])
+                day = event_date.date().isoformat()
+                if store:
+                    inputs, coverage = store.at(a["fighter_id"], b["fighter_id"], day, row)
+                    result["min_prior_complete_bouts"] = min(
+                        coverage["a_stats_bouts"], coverage["b_stats_bouts"]
                     )
-                probability = predict_matchup(model, a, b, event_date.date().isoformat(), db=db)
+                    result["recent_complete"] = coverage["recent_complete"]
+                    if result["min_prior_complete_bouts"] < 2:
+                        raise ValueError("Both fighters need two complete earlier recorded bouts")
+                    p = float(model.predict_proba(inputs)[0, 1])
+                    probability = p if a["fighter_id"] == coverage["fighter_a_id"] else 1 - p
+                else:
+                    history = [
+                        compute_pre_fight_metrics(p["fighter_id"], day, db=db) for p in (a, b)
+                    ]
+                    result["min_prior_complete_bouts"] = min(p["stats_bouts"] for p in history)
+                    result["recent_complete"] = all(
+                        p["moving_window_complete"] and p["moving_window_bouts"] == 3
+                        for p in history
+                    )
+                    probability = predict_matchup(model, a, b, day, db=db)
+                if not np.isfinite(probability) or not 0 <= probability <= 1:
+                    raise ValueError("Model returned an invalid probability")
+                price = row["kalshi_probability"]
+                values = (
+                    contract_value(probability, price)
+                    if pd.notna(price)
+                    else {"edge": np.nan, "ev_per_contract": np.nan, "roi": np.nan}
+                )
                 result.update(
                     {
                         "our_probability": probability,
-                        **contract_value(probability, row["kalshi_probability"]),
+                        **values,
                         "profile_source": "Earlier bouts + archived reach/DOB"
                         if any(p.get("source", "").startswith("archive") for p in (a, b))
                         else "Earlier bouts + UFCStats reach/DOB",
@@ -96,5 +138,9 @@ def evaluate_markets(markets: pd.DataFrame, model, db: Database | None = None) -
             "roi",
             "analysis_status",
             "profile_source",
+            "fighter_id",
+            "opponent_id",
+            "min_prior_complete_bouts",
+            "recent_complete",
         ],
     )
