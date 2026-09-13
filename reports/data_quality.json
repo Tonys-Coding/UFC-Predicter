@@ -1,0 +1,1173 @@
+{
+  "audit_version": 2,
+  "fingerprint": "f86c4da6d41d900dc8ecab56962bbce6b553e820f25a30f56dd5087dc11b4447",
+  "completed_at": "2026-09-13T08:32:13.565250+00:00",
+  "source_hashes": {
+    "ufc_event_details.csv": "1920491da47a20a7186e1ac91fea1a1fcd3281c0627b560fa70aac5e58b685dc",
+    "ufc_fight_results.csv": "ecce6eba834181101a565205221647ab2ac19c71f4290cc0962cf444ed19c983",
+    "ufc_fight_stats.csv": "55f41a41020bdccaa1c29850c17697fc9bb976f59b65450d90dfed1c61db5723",
+    "ufc_fighter_tott.csv": "7ab0b4d1c064cd3ae65bd42fdea712033feb79b7888bc534ffba3d79ee7b40bb",
+    "kaggle_fights": "944a458372c36572d0b6e681a0c88d924caa4b8406b13431003560908b2163e2",
+    "kaggle_fighters": "a3dec1620adb0f1496b91fd86fe290dd64153ee9d225fcd3268abcff16c5ca52"
+  },
+  "source_commit": "44a4022696135ddcfd1536b100ff3e909209dc3d",
+  "input_rows": {
+    "ufc_event_details.csv": 787,
+    "ufc_fight_results.csv": 8899,
+    "ufc_fight_stats.csv": 41836,
+    "ufc_fighter_tott.csv": 4619,
+    "kaggle_fights": 8551,
+    "kaggle_profiles": 4455
+  },
+  "accepted_fights": 8810,
+  "new_fights": 0,
+  "new_fight_ids": [],
+  "accepted_round_rows": 41382,
+  "core_rows": 17574,
+  "profiles_added_or_filled": 23,
+  "duration_corrections": 27,
+  "corrections": [
+    {
+      "id": "73c07530f667289f",
+      "field": "duration_seconds",
+      "original": 780.0,
+      "corrected": 1260,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "997753de17f81e3a",
+      "field": "duration_seconds",
+      "original": 480.0,
+      "corrected": 900,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "3fc4d9f17be8d003",
+      "field": "duration_seconds",
+      "original": 435.0,
+      "corrected": 855,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "453118d7f05be814",
+      "field": "duration_seconds",
+      "original": 780.0,
+      "corrected": 1260,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "86090172facd6cf7",
+      "field": "duration_seconds",
+      "original": 480.0,
+      "corrected": 900,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "6c15d41df17349c9",
+      "field": "duration_seconds",
+      "original": 451.0,
+      "corrected": 871,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "48fccedc8889a473",
+      "field": "duration_seconds",
+      "original": 480.0,
+      "corrected": 900,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "07423d10cc23bfeb",
+      "field": "duration_seconds",
+      "original": 780.0,
+      "corrected": 1260,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "dbdad3eb157703bc",
+      "field": "duration_seconds",
+      "original": 480.0,
+      "corrected": 900,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "1d3c1dedfba6eddc",
+      "field": "duration_seconds",
+      "original": 388.0,
+      "corrected": 988,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "a4d8e991ec42b048",
+      "field": "duration_seconds",
+      "original": 338.0,
+      "corrected": 758,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "17526cb9fb6072ef",
+      "field": "duration_seconds",
+      "original": 480.0,
+      "corrected": 900,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "21aa163b80e504f9",
+      "field": "duration_seconds",
+      "original": 480.0,
+      "corrected": 900,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "b55481006297ba05",
+      "field": "duration_seconds",
+      "original": 480.0,
+      "corrected": 900,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "43885ee6cc5ed241",
+      "field": "duration_seconds",
+      "original": 480.0,
+      "corrected": 900,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "748657d9ba9d7c71",
+      "field": "duration_seconds",
+      "original": 780.0,
+      "corrected": 1260,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "764e492b55c0ec40",
+      "field": "duration_seconds",
+      "original": 480.0,
+      "corrected": 900,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "3bd789bcfb12368d",
+      "field": "duration_seconds",
+      "original": 480.0,
+      "corrected": 900,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "1a5171802bf3bce6",
+      "field": "duration_seconds",
+      "original": 780.0,
+      "corrected": 1260,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "6158150558be0edf",
+      "field": "duration_seconds",
+      "original": 480.0,
+      "corrected": 900,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "45e49fe8d3d1bfb5",
+      "field": "duration_seconds",
+      "original": 480.0,
+      "corrected": 900,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "e45feb9866eb2da7",
+      "field": "duration_seconds",
+      "original": 480.0,
+      "corrected": 900,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "9f6a7aee1fce539a",
+      "field": "duration_seconds",
+      "original": 480.0,
+      "corrected": 1080,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "6a060498e60756af",
+      "field": "duration_seconds",
+      "original": 780.0,
+      "corrected": 1800,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "524b49a676498c6d",
+      "field": "duration_seconds",
+      "original": 480.0,
+      "corrected": 1800,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "3932f8e9a74f3d11",
+      "field": "duration_seconds",
+      "original": 480.0,
+      "corrected": 1980,
+      "reason": "scheduled historical round lengths"
+    },
+    {
+      "id": "db8df615610f3632",
+      "field": "duration_seconds",
+      "original": 600.0,
+      "corrected": 2160,
+      "reason": "scheduled historical round lengths"
+    }
+  ],
+  "issues": [
+    {
+      "kind": "height_conflict",
+      "id": "7674b836ce0698a0",
+      "reason": "Sources disagree; retained archive measurement"
+    },
+    {
+      "kind": "profile_conflict",
+      "id": "ac0874309da489b9",
+      "reason": "dob: existing=1993-10-10, kaggle=1992-10-10; retained existing"
+    },
+    {
+      "kind": "profile_conflict",
+      "id": "bc7f4b2d4c2724a2",
+      "reason": "dob: existing=2004-10-19, kaggle=1990-07-04; retained existing"
+    },
+    {
+      "kind": "profile_conflict",
+      "id": "6a311920edd73c85",
+      "reason": "dob: existing=1983-04-14, kaggle=1993-04-14; retained existing"
+    },
+    {
+      "kind": "profile_conflict",
+      "id": "98aa60cf58071fd6",
+      "reason": "reach: existing=66.0, kaggle=63.0; retained existing"
+    },
+    {
+      "kind": "height_conflict",
+      "id": "98aa60cf58071fd6",
+      "reason": "Sources disagree; retained archive measurement"
+    },
+    {
+      "kind": "profile_conflict",
+      "id": "9d83f6da776ff7d6",
+      "reason": "dob: existing=1991-05-04, kaggle=1992-05-04; retained existing"
+    },
+    {
+      "kind": "profile_conflict",
+      "id": "2cfba6c837c03ed0",
+      "reason": "reach: existing=72.0, kaggle=70.0; retained existing"
+    },
+    {
+      "kind": "height_conflict",
+      "id": "2cfba6c837c03ed0",
+      "reason": "Sources disagree; retained archive measurement"
+    },
+    {
+      "kind": "profile_conflict",
+      "id": "abb68e3c7ca128f2",
+      "reason": "reach: existing=63.0, kaggle=64.0; retained existing"
+    },
+    {
+      "kind": "profile_conflict",
+      "id": "849c5d9979df5357",
+      "reason": "dob: existing=1992-11-03, kaggle=1992-10-03; retained existing"
+    },
+    {
+      "kind": "height_conflict",
+      "id": "b4443fae47e7eb9d",
+      "reason": "Sources disagree; retained archive measurement"
+    },
+    {
+      "kind": "profile_conflict",
+      "id": "6d48a2df51749d91",
+      "reason": "reach: existing=79.0, kaggle=80.0; retained existing"
+    },
+    {
+      "kind": "height_conflict",
+      "id": "6d48a2df51749d91",
+      "reason": "Sources disagree; retained archive measurement"
+    },
+    {
+      "kind": "profile_conflict",
+      "id": "024158997e7c5829",
+      "reason": "reach: existing=79.0, kaggle=80.0; retained existing"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/ab5922e10699e869",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/6cd4457edf4089f9",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/de1a3734be60e6a1",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/05bc7a042156b6f6",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/3859314324918eeb",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/930317fde9dbc55e",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/20d74ed23d3e9b3a",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/bc0b3c16246e0d1d",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/827c64369b374989",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/f5aff2f858311fbc",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/2e7f8d0ad385876d",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/10ab34056720b6b4",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/a5a749aa0061fdb4",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/fc9168fd102e2e66",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "kaggle_conflict",
+      "id": "44d58943ac8e47e1",
+      "reason": "Winner differs; supplementary row quarantined"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/abf5f4d6f777cf7b",
+      "reason": "Missing or ambiguous event mapping"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/16523b1bec3cd7b0",
+      "reason": "Missing or ambiguous event mapping"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/836a188a90e479a5",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "kaggle_conflict",
+      "id": "84b66bf7fba2d59d",
+      "reason": "Winner differs; supplementary row quarantined"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/668a44403a130043",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "kaggle_conflict",
+      "id": "cff0abc02974fb4a",
+      "reason": "Winner differs; supplementary row quarantined"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "de1a3734be60e6a1",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "944b929130b23c2a",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "7cbfeba85f86d1bf",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "114d2f6fcd3f6f00",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "202c47db69768356",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "8a884a7930d75ca9",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "07a378b257aad5a9",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "352839a03b428e74",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "9474f64347aade7a",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "3dc1a6335d890650",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "d822ebc7dbc6c259",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "a1e193425e716b42",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "c4a6174b0698652e",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "3dd2fde7bff79c51",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/3d6571790c21527c",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/7f33fbdc35afd721",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/b6a87389bdc36a00",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "kaggle_conflict",
+      "id": "ad68450307a21ab1",
+      "reason": "Winner differs; supplementary row quarantined"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/6ecfa439ef900bcc",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/8c540eb4afe8c43e",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/8ef7723b6a8b45e1",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/b6475543ab6d20c9",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/775788423f5eeb99",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/1a635a5e4551e7d5",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/781a2ea50f5ae68f",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/bde635a4f345bc3e",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "kaggle_conflict",
+      "id": "d2caa1ddb9de7481",
+      "reason": "Winner differs; supplementary row quarantined"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/94541dd979e0b4bd",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/54de03e04f571735",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/2b7883b304b3df1c",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "kaggle_conflict",
+      "id": "3b12094dd48c2dc5",
+      "reason": "Winner differs; supplementary row quarantined"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/77992b8727382373",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/4f20f3ada1489823",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/0494ebcee93e717b",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/539732694ab2c8d6",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "b395c89e19a3fec4",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "697efaf0d162e877",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "c0ca4c201d086ea8",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "2e1435c160bfe8b2",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "a5d76e93a5052e3f",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "79f03eca3fe5cdb3",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "7a0813ec0fadc84e",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "5d3e046b6bcd49f5",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "bcec26b425194e40",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "58b2fdad7af9be02",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "duplicate_fight",
+      "id": "11318a7807cee8ca",
+      "reason": "Repeated archive fight URL; retained first record"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/9124740fe7816d70",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/d00d5ef4ae0ac01b",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/c3af2b6ab1262fef",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/330506571d2778b1",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/38b6ef176439c39b",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/226884e46a10865d",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/9039762cb9f4abdb",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/fefa96b6d939ffea",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/bb1ac382e0277b3f",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/b381dc272b32ce03",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/55bf7f19a132e0fc",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/031e6624f96aceb8",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/dbb5d682a2d7f584",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/1a2d13834696c4ab",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/6a0217099efee13f",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/57ff0eb2351979c4",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/c2bcdcc472228768",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/187681b2843174b5",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/08c6b88ac22717ed",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/18cdc16fc7ab7ce1",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/a19d619f1b9bee7b",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/00566b4d89565373",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/8e41d022b55277ae",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/3dbf17b9946d26db",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/33a93002fef6c89d",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/52f77a9f9eb66ab7",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/556952a9520d0ae0",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/c67473192bda50d8",
+      "reason": "Ambiguous fighter identity; a name is not a stable identifier"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/635fbf57001897c7",
+      "reason": "Incomplete or duplicated individual rounds"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/8b258bbb37f74a66",
+      "reason": "Incomplete or duplicated individual rounds"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/4bce0ce561a65288",
+      "reason": "Incomplete or duplicated individual rounds"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/b80872821bc4f6ba",
+      "reason": "Incomplete or duplicated individual rounds"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/ec1bda9a4c2aab42",
+      "reason": "Incomplete or duplicated individual rounds"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/2750ac5854e8b28b",
+      "reason": "Incomplete or duplicated individual rounds"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/77bf1e37929b0d59",
+      "reason": "Incomplete or duplicated individual rounds"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/565ecefd8a37ad7e",
+      "reason": "Incomplete or duplicated individual rounds"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/2f449bd58b3d9a99",
+      "reason": "Incomplete or duplicated individual rounds"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/d93c8c77e1091a16",
+      "reason": "Incomplete or duplicated individual rounds"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/a5c90086fb65f58e",
+      "reason": "Incomplete or duplicated individual rounds"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/3badedeb2c5533f4",
+      "reason": "Incomplete or duplicated individual rounds"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/c413b0abc04358c3",
+      "reason": "Incomplete or duplicated individual rounds"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/f59b1215176636f6",
+      "reason": "Incomplete or duplicated individual rounds"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/5701dbbbfa4f8313",
+      "reason": "Incomplete or duplicated individual rounds"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/7ffcc3a72e082ace",
+      "reason": "Incomplete or duplicated individual rounds"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/6449a1a9a69a830c",
+      "reason": "Incomplete or duplicated individual rounds"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/e4fe950846b51bdf",
+      "reason": "Incomplete or duplicated individual rounds"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/4b334c9727eee450",
+      "reason": "Incomplete or duplicated individual rounds"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/8e03db41687d9132",
+      "reason": "Incomplete or duplicated individual rounds"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/b297c3e938e1005e",
+      "reason": "Incomplete or duplicated individual rounds"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/b80e6a799c95d499",
+      "reason": "Incomplete or duplicated individual rounds"
+    },
+    {
+      "kind": "fight_or_round_excluded",
+      "id": "http://ufcstats.com/fight-details/a1db4c917777aa79",
+      "reason": "Incomplete or duplicated individual rounds"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "c67473192bda50d8",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "556952a9520d0ae0",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "52f77a9f9eb66ab7",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "33a93002fef6c89d",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "3dbf17b9946d26db",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "8e41d022b55277ae",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "00566b4d89565373",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "a19d619f1b9bee7b",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "18cdc16fc7ab7ce1",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "08c6b88ac22717ed",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "187681b2843174b5",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "c2bcdcc472228768",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "57ff0eb2351979c4",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "6a0217099efee13f",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "1a2d13834696c4ab",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "dbb5d682a2d7f584",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "031e6624f96aceb8",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "55bf7f19a132e0fc",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "b381dc272b32ce03",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "bb1ac382e0277b3f",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "fefa96b6d939ffea",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "9039762cb9f4abdb",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "226884e46a10865d",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "38b6ef176439c39b",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "330506571d2778b1",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "c3af2b6ab1262fef",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "d00d5ef4ae0ac01b",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "9124740fe7816d70",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "539732694ab2c8d6",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "0494ebcee93e717b",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "4f20f3ada1489823",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "77992b8727382373",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "2b7883b304b3df1c",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "54de03e04f571735",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "94541dd979e0b4bd",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "781a2ea50f5ae68f",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "bde635a4f345bc3e",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "1a635a5e4551e7d5",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "775788423f5eeb99",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "8ef7723b6a8b45e1",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "b6475543ab6d20c9",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "8c540eb4afe8c43e",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "6ecfa439ef900bcc",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "b6a87389bdc36a00",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "7f33fbdc35afd721",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "3d6571790c21527c",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "16523b1bec3cd7b0",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "abf5f4d6f777cf7b",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "de1a3734be60e6a1",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "668a44403a130043",
+      "reason": "No verified archive event and fighter mapping"
+    },
+    {
+      "kind": "kaggle_unresolved",
+      "id": "836a188a90e479a5",
+      "reason": "No verified archive event and fighter mapping"
+    }
+  ],
+  "issue_counts": {
+    "fight_or_round_excluded": 87,
+    "kaggle_unresolved": 51,
+    "duplicate_fight": 25,
+    "profile_conflict": 10,
+    "kaggle_conflict": 6,
+    "height_conflict": 5
+  },
+  "missingness": {
+    "kd": 0,
+    "sig_landed": 0,
+    "sig_attempted": 0,
+    "td_landed": 0,
+    "td_attempted": 0,
+    "sub_att": 0,
+    "reversals": 0,
+    "control_seconds": 428,
+    "head_landed": 0,
+    "head_attempted": 0,
+    "body_landed": 0,
+    "body_attempted": 0,
+    "leg_landed": 0,
+    "leg_attempted": 0,
+    "distance_landed": 0,
+    "distance_attempted": 0,
+    "clinch_landed": 0,
+    "clinch_attempted": 0,
+    "ground_landed": 0,
+    "ground_attempted": 0
+  },
+  "policy": "No dataset imputation. Original payloads retained locally. Archive nulls remain null; Kaggle zero-filled optional counts are not trusted as observations."
+}

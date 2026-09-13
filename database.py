@@ -15,6 +15,7 @@ from uuid import uuid4
 
 import pandas as pd
 
+from migrations import migrate, prepare_migration
 from settings import DB_PATH, configure_logging
 
 log = logging.getLogger("ufc.database")
@@ -96,6 +97,7 @@ class Database:
     def __init__(self, path: str | Path = DB_PATH):
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        prepare_migration(self.path)
         with self.connection() as con:
             con.execute("PRAGMA journal_mode=WAL")
             con.executescript(SCHEMA)
@@ -104,6 +106,7 @@ class Database:
                 con.execute(
                     "ALTER TABLE fighter_profiles ADD COLUMN source TEXT NOT NULL DEFAULT 'ufcstats'"
                 )
+            migrate(con)
 
     @contextmanager
     def connection(self) -> Iterator[sqlite3.Connection]:

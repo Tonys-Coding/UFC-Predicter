@@ -1,4 +1,5 @@
 .venv/
+.venv-import/
 __pycache__/
 .pytest_cache/
 .ruff_cache/
@@ -12,4 +13,8 @@ __pycache__/
 cache/
 logs/
 artifacts/
+backups/
+*.numbers
+*.csv
+*.ndjson
 .DS_Store

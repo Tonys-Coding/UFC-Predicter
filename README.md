@@ -215,3 +215,25 @@ The repository is connected to [Tonys-Coding/UFC-Predicter](https://github.com/T
 - [scikit-learn CalibratedClassifierCV](https://scikit-learn.org/1.6/modules/generated/sklearn.calibration.CalibratedClassifierCV.html): held-out probability calibration and ensemble behavior.
 
 This project is configured for a single user on localhost. Public or shared deployment requires a separate authentication and operational design.
+
+## Audited data import (next release)
+
+Before the first versioned migration, the application makes a SQLite-native backup under `backups/`. Model backups are stored separately. The migration adds round statistics, source provenance, fight context, and prospective observation tables without modifying the betting journal.
+
+Run the audited importer against the cached pinned archive:
+
+```sh
+python data_audit.py
+```
+
+To also reconcile the supplied Kaggle exports, pass `--kaggle-fights PATH` and `--kaggle-fighters PATH`. CSV files work directly. Apple Numbers files require an isolated parser runtime because its dependencies differ from Streamlit's:
+
+```sh
+python3.12 -m venv .venv-import
+.venv-import/bin/python -m pip install -r requirements-import.txt
+python data_audit.py --kaggle-fights /path/to/fights.numbers --kaggle-fighters /path/to/fighters.numbers
+```
+
+Only the first nonblank table on the first Numbers sheet is read. Blank sheets and copied sample tables are ignored. Files are fingerprinted; repeating an identical import makes no data changes. The full local source payloads, acceptance/quarantine reasons, and import history are retained in SQLite. `reports/data_quality.json` is the public, nonpersonal report for the most recent import; `new_fights` is that run's delta, not the cumulative corpus size.
+
+The initial audited import recovered 20 verified fights, stored 41,382 fighter-round records, and identified 27 incorrect Kaggle durations. Later imports preserve those corrections. The source archive retains 428 missing round-level control-time observations as nulls. Current career snapshots and Kaggle zero-filled optional counts are not used to invent historical observations. Existing conflicting values are retained and reported for investigation.

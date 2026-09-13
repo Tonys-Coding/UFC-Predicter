@@ -1,0 +1,2 @@
+# Optional isolated runtime for Apple Numbers ingestion (not the Streamlit environment).
+numbers-parser==4.19.0
